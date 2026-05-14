@@ -1,0 +1,57 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Group {
+  id                String   @id @default(cuid())
+  name              String
+  startDate         DateTime @map("start_date")
+  endDate           DateTime @map("end_date")
+  taskCapPerDay     Int      @default(10) @map("task_cap_per_day")
+  penaltyPerTask    Int      @default(2) @map("penalty_per_task")
+  users             User[]
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  @@map("groups")
+}
+
+model User {
+  id        String     @id @default(cuid())
+  groupId   String     @map("group_id")
+  name      String
+  slug      String     @unique
+  email     String
+  createdAt DateTime   @default(now()) @map("created_at")
+
+  group     Group      @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  checkIns  CheckIn[]
+
+  @@map("users")
+}
+
+model CheckIn {
+  id           String    @id @default(cuid())
+  userId       String    @map("user_id")
+  date         String    // YYYY-MM-DD format
+  task1        Boolean   @default(false) @map("task_1")
+  task2        Boolean   @default(false) @map("task_2")
+  task3        Boolean   @default(false) @map("task_3")
+  task4        Boolean   @default(false) @map("task_4")
+  task5        Boolean   @default(false) @map("task_5")
+  penalty      Int       @default(0)
+  submittedAt  DateTime  @default(now()) @map("submitted_at")
+  isAutoFilled Boolean   @default(false) @map("is_auto_filled")
+  correctedAt  DateTime? @map("corrected_at")
+
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+  @@map("check_ins")
+}
