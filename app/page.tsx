@@ -8,19 +8,56 @@ export default async function Dashboard() {
     timeZone: "America/Denver",
   });
 
-  // Fetch all users with their check-ins
-  const users = await prisma.user.findMany({
-    include: {
-      checkIns: true,
-      group: true,
-    },
-    orderBy: {
-      name: "asc",
-    },
-  });
+  let users;
 
-  if (users.length === 0) {
-    return <div>No users found</div>;
+  try {
+    // Fetch all users with their check-ins
+    users = await prisma.user.findMany({
+      include: {
+        checkIns: true,
+        group: true,
+      },
+      orderBy: {
+        name: "asc",
+      },
+    });
+
+    if (users.length === 0) {
+      return (
+        <div className="min-h-screen bg-zinc-900 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl p-8 max-w-md">
+            <h1 className="text-2xl font-bold text-zinc-900 mb-4">No Users Found</h1>
+            <p className="text-zinc-600 mb-4">The database is empty. Please run the seed script.</p>
+            <a href="/api/test-db" className="text-blue-600 hover:underline">
+              Test Database Connection
+            </a>
+          </div>
+        </div>
+      );
+    }
+  } catch (error) {
+    console.error("Dashboard error:", error);
+    return (
+      <div className="min-h-screen bg-zinc-900 flex items-center justify-center p-4">
+        <div className="bg-white rounded-xl p-8 max-w-2xl">
+          <h1 className="text-2xl font-bold text-red-600 mb-4">Database Connection Error</h1>
+          <p className="text-zinc-700 mb-4">
+            Could not connect to the database. Please check your environment variables.
+          </p>
+          <div className="bg-red-50 border border-red-200 rounded p-4 mb-4">
+            <p className="text-sm font-mono text-red-800">
+              {error instanceof Error ? error.message : "Unknown error"}
+            </p>
+          </div>
+          <a
+            href="/api/test-db"
+            className="inline-block px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            Test Database Connection
+          </a>
+        </div>
+      </div>
+    );
   }
 
   const group = users[0].group;
