@@ -22,6 +22,8 @@ export default async function AdminPage() {
     },
   });
 
+  type CheckInWithUser = typeof checkIns[number];
+
   const group = users[0]?.group;
 
   // Calculate the date range for days 1-10 (May 4 - May 13, 2026)
@@ -77,7 +79,7 @@ export default async function AdminPage() {
                   No check-ins yet
                 </p>
               ) : (
-                checkIns.map((checkIn) => {
+                checkIns.map((checkIn: CheckInWithUser) => {
                   const completedTasks = [
                     checkIn.task1,
                     checkIn.task2,
