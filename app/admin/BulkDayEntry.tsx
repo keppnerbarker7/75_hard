@@ -33,7 +33,26 @@ const TASK_LABELS = [
 
 export default function BulkDayEntry({ users, startDate }: BulkDayEntryProps) {
   const router = useRouter();
-  const [currentDayOffset, setCurrentDayOffset] = useState(0);
+
+  // Calculate initial day offset to default to today
+  const calculateInitialDayOffset = () => {
+    const startDateStr = new Date(startDate).toLocaleDateString("en-CA", {
+      timeZone: "America/Denver",
+    });
+    const todayStr = new Date().toLocaleDateString("en-CA", {
+      timeZone: "America/Denver",
+    });
+
+    const start = new Date(startDateStr);
+    const today = new Date(todayStr);
+    const daysPassed = Math.floor(
+      (today.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)
+    );
+
+    return Math.max(0, daysPassed);
+  };
+
+  const [currentDayOffset, setCurrentDayOffset] = useState(calculateInitialDayOffset());
   const [checkIns, setCheckIns] = useState<Record<string, CheckIn>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
