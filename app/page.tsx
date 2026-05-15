@@ -256,9 +256,9 @@ export default async function Dashboard() {
                           </a>
                           <a
                             href={`/stats/${user.slug}`}
-                            className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                            className="px-2 py-1 text-xs bg-blue-100 text-blue-700 hover:bg-blue-200 rounded-md font-semibold transition-colors"
                           >
-                            stats →
+                            📊 stats
                           </a>
                         </div>
                         {user.currentStreak > 0 && (
