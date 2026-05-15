@@ -50,6 +50,23 @@ export default async function UserStatsPage({
     0
   );
 
+  // Prepare data for completion chart
+  const chartData = user.checkIns.map((checkIn, index) => {
+    const tasksCompleted = [
+      checkIn.task1,
+      checkIn.task2,
+      checkIn.task3,
+      checkIn.task4,
+      checkIn.task5,
+    ].filter(Boolean).length;
+
+    return {
+      day: index + 1,
+      completionRate: (tasksCompleted / 5) * 100,
+      date: checkIn.date,
+    };
+  });
+
   // Best/worst days of week analysis
   const dayOfWeekStats: Record<
     string,
@@ -132,6 +149,109 @@ export default async function UserStatsPage({
             </p>
           </div>
         </div>
+
+        {/* Completion Chart */}
+        {chartData.length > 0 && (
+          <div className="bg-white rounded-2xl p-6 shadow-lg mb-6">
+            <h2 className="text-xl font-bold text-zinc-900 mb-4">
+              Daily Task Completion
+            </h2>
+            <div className="w-full overflow-x-auto">
+              <svg
+                viewBox="0 0 800 300"
+                className="w-full h-auto"
+                style={{ minHeight: "200px" }}
+              >
+                {/* Grid lines */}
+                {[0, 25, 50, 75, 100].map((percent) => (
+                  <g key={percent}>
+                    <line
+                      x1="60"
+                      y1={240 - (percent * 200) / 100}
+                      x2="780"
+                      y2={240 - (percent * 200) / 100}
+                      stroke="#e5e7eb"
+                      strokeWidth="1"
+                    />
+                    <text
+                      x="45"
+                      y={240 - (percent * 200) / 100 + 5}
+                      fill="#6b7280"
+                      fontSize="12"
+                      textAnchor="end"
+                    >
+                      {percent}%
+                    </text>
+                  </g>
+                ))}
+
+                {/* Line path */}
+                <path
+                  d={chartData
+                    .map((point, i) => {
+                      const x = 60 + (i / (chartData.length - 1 || 1)) * 720;
+                      const y = 240 - (point.completionRate * 200) / 100;
+                      return `${i === 0 ? "M" : "L"} ${x} ${y}`;
+                    })
+                    .join(" ")}
+                  fill="none"
+                  stroke="#3b82f6"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+
+                {/* Data points */}
+                {chartData.map((point, i) => {
+                  const x = 60 + (i / (chartData.length - 1 || 1)) * 720;
+                  const y = 240 - (point.completionRate * 200) / 100;
+                  const color = point.completionRate === 100 ? "#22c55e" : point.completionRate >= 60 ? "#3b82f6" : "#ef4444";
+
+                  return (
+                    <g key={i}>
+                      <circle cx={x} cy={y} r="5" fill={color} />
+                      <circle cx={x} cy={y} r="3" fill="white" />
+                    </g>
+                  );
+                })}
+
+                {/* X-axis labels */}
+                {chartData
+                  .filter((_, i) => i % Math.max(1, Math.floor(chartData.length / 10)) === 0 || i === chartData.length - 1)
+                  .map((point, idx, arr) => {
+                    const i = chartData.indexOf(point);
+                    const x = 60 + (i / (chartData.length - 1 || 1)) * 720;
+                    return (
+                      <text
+                        key={i}
+                        x={x}
+                        y="270"
+                        fill="#6b7280"
+                        fontSize="12"
+                        textAnchor="middle"
+                      >
+                        Day {point.day}
+                      </text>
+                    );
+                  })}
+              </svg>
+            </div>
+            <div className="flex justify-center gap-6 mt-4 text-sm">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                <span className="text-zinc-600">100%</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                <span className="text-zinc-600">60-99%</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                <span className="text-zinc-600">&lt;60%</span>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
