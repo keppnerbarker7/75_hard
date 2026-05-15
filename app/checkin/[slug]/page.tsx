@@ -52,11 +52,6 @@ export default async function CheckInPage({
     0
   );
 
-  // Calculate user's missing days (for current position on leaderboard)
-  const userDaysRecorded = allCheckIns.length;
-  const userMissingDays = Math.max(0, daysPassed - userDaysRecorded);
-  const userMissingPenalty = userMissingDays * 10;
-
   // Calculate pool and position info
   const allUsers = await prisma.user.findMany({
     include: { checkIns: true },
@@ -77,6 +72,11 @@ export default async function CheckInPage({
   const daysPassed = Math.floor(
     (todayDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
   ) + 1; // +1 to include start day
+
+  // Calculate user's missing days (for current position on leaderboard)
+  const userDaysRecorded = allCheckIns.length;
+  const userMissingDays = Math.max(0, daysPassed - userDaysRecorded);
+  const userMissingPenalty = userMissingDays * 10;
 
   // Calculate total pool including penalties for unrecorded days
   const recordedPenalties = allUsers.reduce((sum, u) => {
