@@ -82,6 +82,7 @@ export function calculateStreakData(checkIns: CheckIn[]): {
   let currentStreak = 0;
   let longestStreak = 0;
   let tempStreak = 0;
+  let countingCurrentStreak = true; // Only count streak from most recent backwards
 
   // Calculate from most recent backwards for current streak
   for (let i = sortedCheckIns.length - 1; i >= 0; i--) {
@@ -92,9 +93,9 @@ export function calculateStreakData(checkIns: CheckIn[]): {
       perfectDays++;
       tempStreak++;
 
-      // Current streak is only counted from the end
-      if (i === sortedCheckIns.length - 1 || currentStreak > 0) {
-        currentStreak = tempStreak;
+      // Only count toward current streak if we're still in the streak from the most recent
+      if (countingCurrentStreak) {
+        currentStreak++;
       }
     } else {
       // Streak broken
@@ -103,10 +104,8 @@ export function calculateStreakData(checkIns: CheckIn[]): {
       }
       tempStreak = 0;
 
-      // If we haven't established a current streak yet, it's 0
-      if (i === sortedCheckIns.length - 1) {
-        currentStreak = 0;
-      }
+      // Stop counting current streak once we hit first non-perfect day
+      countingCurrentStreak = false;
     }
   }
 
