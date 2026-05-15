@@ -118,7 +118,7 @@ export default async function UserStatsPage({
         </div>
 
         {/* Key Stats Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-2 gap-4 mb-6 max-w-2xl mx-auto">
           <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-center">
             <p className="text-zinc-400 text-xs mb-1">Current Streak</p>
             <p className="text-3xl font-bold text-orange-500">
@@ -130,16 +130,6 @@ export default async function UserStatsPage({
             <p className="text-3xl font-bold text-green-500">
               {streakData.perfectDays}
             </p>
-          </div>
-          <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-center">
-            <p className="text-zinc-400 text-xs mb-1">Longest Streak</p>
-            <p className="text-3xl font-bold text-purple-500">
-              {streakData.longestStreak}
-            </p>
-          </div>
-          <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-center">
-            <p className="text-zinc-400 text-xs mb-1">Total Penalties</p>
-            <p className="text-3xl font-bold text-red-500">${totalPenalties}</p>
           </div>
         </div>
 
