@@ -229,12 +229,20 @@ export default async function Dashboard() {
                         {index === 0 ? "👑" : `${index + 1}`}
                       </span>
                       <div>
-                        <a
-                          href={`/checkin/${user.slug}`}
-                          className="font-bold text-zinc-900 hover:text-zinc-600 text-lg"
-                        >
-                          {user.name}
-                        </a>
+                        <div className="flex items-center gap-2">
+                          <a
+                            href={`/checkin/${user.slug}`}
+                            className="font-bold text-zinc-900 hover:text-zinc-600 text-lg"
+                          >
+                            {user.name}
+                          </a>
+                          <a
+                            href={`/stats/${user.slug}`}
+                            className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                          >
+                            stats →
+                          </a>
+                        </div>
                         {user.currentStreak > 0 && (
                           <div className="flex items-center gap-1 mt-1">
                             <span className="text-orange-600 text-xl">🔥</span>
