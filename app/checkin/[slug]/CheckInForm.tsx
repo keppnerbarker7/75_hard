@@ -14,7 +14,8 @@ type CheckInFormProps = {
   tasks: Task[];
   totalPenalty: number;
   currentPosition: number;
-  share: number;
+  poolTotal: number;
+  groupSize: number;
 };
 
 export default function CheckInForm({
@@ -23,7 +24,8 @@ export default function CheckInForm({
   tasks,
   totalPenalty,
   currentPosition,
-  share,
+  poolTotal,
+  groupSize,
 }: CheckInFormProps) {
   const router = useRouter();
   const [checkedTasks, setCheckedTasks] = useState<Record<number, boolean>>({
@@ -76,7 +78,13 @@ export default function CheckInForm({
   const completedCount = Object.values(checkedTasks).filter(Boolean).length;
   const missedCount = 5 - completedCount;
   const estimatedPenalty = Math.min(missedCount * 2, 10);
-  const newPosition = share - (totalPenalty + estimatedPenalty);
+
+  // Calculate new position after adding today's penalty
+  // When you add a penalty, the pool grows and everyone's share increases
+  const newPoolTotal = poolTotal + estimatedPenalty;
+  const newShare = newPoolTotal / groupSize;
+  const newTotalPenalty = totalPenalty + estimatedPenalty;
+  const newPosition = newShare - newTotalPenalty;
 
   return (
     <form onSubmit={handleSubmit}>

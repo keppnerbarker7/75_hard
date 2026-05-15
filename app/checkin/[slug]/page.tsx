@@ -223,7 +223,8 @@ export default async function CheckInPage({
               tasks={TASKS}
               totalPenalty={totalPenalty}
               currentPosition={currentPosition}
-              share={share}
+              poolTotal={poolTotal}
+              groupSize={groupSize}
             />
           )}
 
