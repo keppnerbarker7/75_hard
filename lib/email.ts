@@ -14,6 +14,7 @@ export type CheckInData = {
 export type LeaderboardEntry = {
   name: string;
   totalPenalty: number;
+  netPosition: number;
 };
 
 // Daily reminder email template
