@@ -14,23 +14,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if check-in already exists for this user/date
-    const existingCheckIn = await prisma.checkIn.findUnique({
-      where: {
-        userId_date: {
-          userId,
-          date,
-        },
-      },
-    });
-
-    if (existingCheckIn) {
-      return NextResponse.json(
-        { error: "Check-in already exists for this date" },
-        { status: 409 }
-      );
-    }
-
     // Calculate penalty
     const completedTasks = Object.values(tasks as Record<number, boolean>).filter(
       Boolean
@@ -38,9 +21,24 @@ export async function POST(request: NextRequest) {
     const missedTasks = 5 - completedTasks;
     const penalty = Math.min(missedTasks * 2, 10);
 
-    // Create check-in
-    const checkIn = await prisma.checkIn.create({
-      data: {
+    // Upsert check-in (create or update)
+    const checkIn = await prisma.checkIn.upsert({
+      where: {
+        userId_date: {
+          userId,
+          date,
+        },
+      },
+      update: {
+        task1: tasks[1] || false,
+        task2: tasks[2] || false,
+        task3: tasks[3] || false,
+        task4: tasks[4] || false,
+        task5: tasks[5] || false,
+        penalty,
+        isAutoFilled: false,
+      },
+      create: {
         userId,
         date,
         task1: tasks[1] || false,

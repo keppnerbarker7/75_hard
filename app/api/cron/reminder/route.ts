@@ -17,35 +17,36 @@ export async function GET(request: NextRequest) {
       timeZone: "America/Denver",
     });
 
-    // Get all users with their check-ins
-    const users = await prisma.user.findMany({
-      include: {
-        checkIns: {
-          orderBy: {
-            date: "desc",
-          },
-          take: 10,
-        },
-      },
-    });
+    // Get all users
+    const users = await prisma.user.findMany();
 
-    // Calculate leaderboard
-    const leaderboard = users.map((user) => {
-      const totalPenalty = user.checkIns.reduce(
-        (sum, checkIn) => sum + checkIn.penalty,
-        0
-      );
-      return { name: user.name, totalPenalty };
-    });
+    // Calculate leaderboard with ALL check-ins
+    const leaderboard = await Promise.all(
+      users.map(async (user) => {
+        const allCheckIns = await prisma.checkIn.findMany({
+          where: { userId: user.id },
+        });
+        const totalPenalty = allCheckIns.reduce(
+          (sum, checkIn) => sum + checkIn.penalty,
+          0
+        );
+        return { name: user.name, totalPenalty };
+      })
+    );
     leaderboard.sort((a, b) => a.totalPenalty - b.totalPenalty);
 
     // Send email to each user
     const results = await Promise.all(
       users.map(async (user) => {
         // Get yesterday's check-in
-        const yesterdayCheckIn = user.checkIns.find(
-          (c) => c.date === yesterdayStr
-        );
+        const yesterdayCheckIn = await prisma.checkIn.findUnique({
+          where: {
+            userId_date: {
+              userId: user.id,
+              date: yesterdayStr,
+            },
+          },
+        });
 
         const yesterdayData = yesterdayCheckIn
           ? {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 type User = {
@@ -35,6 +35,7 @@ export default function BulkDayEntry({ users, startDate }: BulkDayEntryProps) {
   const router = useRouter();
   const [currentDayOffset, setCurrentDayOffset] = useState(0);
   const [checkIns, setCheckIns] = useState<Record<string, CheckIn>>({});
+  const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState<{
     type: "success" | "error";
@@ -45,6 +46,39 @@ export default function BulkDayEntry({ users, startDate }: BulkDayEntryProps) {
   const currentDate = new Date(startDate);
   currentDate.setDate(currentDate.getDate() + currentDayOffset);
   const currentDateStr = currentDate.toLocaleDateString("en-CA");
+
+  // Load existing check-ins for the current day
+  useEffect(() => {
+    const loadCheckInsForDay = async () => {
+      setIsLoading(true);
+      try {
+        const response = await fetch(`/api/admin/checkins?date=${currentDateStr}`);
+        if (response.ok) {
+          const data = await response.json();
+          const existingCheckIns: Record<string, CheckIn> = {};
+
+          data.checkIns.forEach((checkIn: any) => {
+            existingCheckIns[checkIn.userId] = {
+              userId: checkIn.userId,
+              task1: checkIn.task1,
+              task2: checkIn.task2,
+              task3: checkIn.task3,
+              task4: checkIn.task4,
+              task5: checkIn.task5,
+            };
+          });
+
+          setCheckIns(existingCheckIns);
+        }
+      } catch (error) {
+        console.error("Failed to load check-ins:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadCheckInsForDay();
+  }, [currentDayOffset, currentDateStr]);
 
   const handleTaskToggle = (userId: string, taskNum: number) => {
     setCheckIns((prev) => {
@@ -112,9 +146,6 @@ export default function BulkDayEntry({ users, startDate }: BulkDayEntryProps) {
         text: `✅ Saved ${successCount} check-ins for ${currentDate.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`,
       });
 
-      // Clear check-ins for next day
-      setCheckIns({});
-
       // Refresh data
       router.refresh();
     } catch (error) {
@@ -129,13 +160,11 @@ export default function BulkDayEntry({ users, startDate }: BulkDayEntryProps) {
 
   const goToNextDay = () => {
     setCurrentDayOffset((prev) => prev + 1);
-    setCheckIns({});
     setMessage(null);
   };
 
   const goToPrevDay = () => {
     setCurrentDayOffset((prev) => Math.max(0, prev - 1));
-    setCheckIns({});
     setMessage(null);
   };
 
@@ -194,7 +223,12 @@ export default function BulkDayEntry({ users, startDate }: BulkDayEntryProps) {
       </div>
 
       {/* Table Grid */}
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+      <div className="bg-white rounded-xl shadow-sm overflow-hidden relative">
+        {isLoading && (
+          <div className="absolute inset-0 bg-white/80 flex items-center justify-center z-10 rounded-xl">
+            <div className="text-zinc-600 font-medium">Loading check-ins...</div>
+          </div>
+        )}
         <table className="w-full">
           <thead>
             <tr className="bg-zinc-900 text-white">
