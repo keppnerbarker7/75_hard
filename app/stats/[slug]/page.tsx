@@ -53,25 +53,37 @@ export default async function UserStatsPage({
   // Best/worst days of week analysis
   const dayOfWeekStats: Record<
     string,
-    { completed: number; total: number; penalties: number }
+    { completed: number; total: number; penalties: number; perfectDays: number }
   > = {
-    Sunday: { completed: 0, total: 0, penalties: 0 },
-    Monday: { completed: 0, total: 0, penalties: 0 },
-    Tuesday: { completed: 0, total: 0, penalties: 0 },
-    Wednesday: { completed: 0, total: 0, penalties: 0 },
-    Thursday: { completed: 0, total: 0, penalties: 0 },
-    Friday: { completed: 0, total: 0, penalties: 0 },
-    Saturday: { completed: 0, total: 0, penalties: 0 },
+    Sunday: { completed: 0, total: 0, penalties: 0, perfectDays: 0 },
+    Monday: { completed: 0, total: 0, penalties: 0, perfectDays: 0 },
+    Tuesday: { completed: 0, total: 0, penalties: 0, perfectDays: 0 },
+    Wednesday: { completed: 0, total: 0, penalties: 0, perfectDays: 0 },
+    Thursday: { completed: 0, total: 0, penalties: 0, perfectDays: 0 },
+    Friday: { completed: 0, total: 0, penalties: 0, perfectDays: 0 },
+    Saturday: { completed: 0, total: 0, penalties: 0, perfectDays: 0 },
   };
 
   user.checkIns.forEach((checkIn) => {
     const date = new Date(checkIn.date);
     const dayName = date.toLocaleDateString("en-US", { weekday: "long" });
-    dayOfWeekStats[dayName].total++;
-    if (checkIn.penalty === 0) {
-      dayOfWeekStats[dayName].completed++;
-    }
+
+    // Count completed tasks
+    const tasksCompleted = [
+      checkIn.task1,
+      checkIn.task2,
+      checkIn.task3,
+      checkIn.task4,
+      checkIn.task5,
+    ].filter(Boolean).length;
+
+    dayOfWeekStats[dayName].completed += tasksCompleted;
+    dayOfWeekStats[dayName].total += 5; // 5 possible tasks per day
     dayOfWeekStats[dayName].penalties += checkIn.penalty;
+
+    if (checkIn.penalty === 0) {
+      dayOfWeekStats[dayName].perfectDays++;
+    }
   });
 
   const bestDay = Object.entries(dayOfWeekStats)
@@ -231,7 +243,7 @@ export default async function UserStatsPage({
                     >
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
-                          <span className="font-bold text-zinc-900">{day}</span>
+                          <span className="font-semibold text-sm text-zinc-900">{day}</span>
                           {isBest && (
                             <span className="text-xs bg-green-600 text-white px-2 py-0.5 rounded-full">
                               Best
@@ -243,11 +255,11 @@ export default async function UserStatsPage({
                             </span>
                           )}
                         </div>
-                        <span className="font-bold text-zinc-900">{rate}%</span>
+                        <span className="font-bold text-lg text-zinc-900">{rate}%</span>
                       </div>
-                      <div className="w-full bg-zinc-200 rounded-full h-2">
+                      <div className="w-full bg-zinc-200 rounded-full h-3">
                         <div
-                          className={`h-2 rounded-full ${
+                          className={`h-3 rounded-full ${
                             rate >= 80
                               ? "bg-green-500"
                               : rate >= 60
@@ -257,8 +269,8 @@ export default async function UserStatsPage({
                           style={{ width: `${rate}%` }}
                         />
                       </div>
-                      <p className="text-xs text-zinc-500 mt-1">
-                        {stats.completed}/{stats.total} perfect days · $
+                      <p className="text-sm text-zinc-600 mt-1 font-medium">
+                        {stats.completed}/{stats.total} tasks completed · {stats.perfectDays} perfect days · $
                         {stats.penalties} penalties
                       </p>
                     </div>
