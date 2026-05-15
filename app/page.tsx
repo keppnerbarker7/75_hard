@@ -5,6 +5,7 @@ import TaskSuccessRate, {
 } from "./components/TaskSuccessRate";
 import GroupCompletionChart from "./components/GroupCompletionChart";
 import GroupHeatmap from "./components/GroupHeatmap";
+import GroupSmallMultiples from "./components/GroupSmallMultiples";
 
 export const dynamic = "force-dynamic";
 
@@ -298,6 +299,9 @@ export default async function Dashboard() {
 
           {/* Option 1: Multi-Line Chart */}
           <GroupCompletionChart users={users} />
+
+          {/* Option 2: Small Multiples */}
+          <GroupSmallMultiples users={users} />
 
           {/* Option 3: Heatmap */}
           <GroupHeatmap users={users} />
