@@ -1,4 +1,5 @@
 type CheckIn = {
+  date: string; // YYYY-MM-DD format
   task1: boolean;
   task2: boolean;
   task3: boolean;
@@ -72,10 +73,13 @@ export function calculateStreakData(checkIns: CheckIn[]): {
   currentStreak: number;
   longestStreak: number;
 } {
-  // Sort check-ins by date (assuming they have a date field)
+  // Sort check-ins by date in ascending order (oldest to newest)
+  // So the LAST element is the most recent date
   const sortedCheckIns = [...checkIns].sort((a, b) => {
-    // If check-ins have date property, use it
-    return 0; // Will be sorted already in most cases
+    // Dates are in YYYY-MM-DD format, so string comparison works correctly
+    if (a.date < b.date) return -1;
+    if (a.date > b.date) return 1;
+    return 0;
   });
 
   let perfectDays = 0;
