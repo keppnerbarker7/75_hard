@@ -19,16 +19,16 @@ type PerfectDaysTrackerProps = {
 };
 
 export default function PerfectDaysTracker({ users }: PerfectDaysTrackerProps) {
-  // Sort by perfect days descending
-  const sortedUsers = [...users].sort((a, b) => b.perfectDays - a.perfectDays);
+  // Sort by current streak descending
+  const sortedUsers = [...users].sort((a, b) => b.currentStreak - a.currentStreak);
 
   return (
     <div className="bg-white rounded-2xl p-6 shadow-lg">
       <h2 className="text-xl font-bold text-zinc-900 mb-2 flex items-center gap-2">
-        🔥 Perfect Days & Streaks
+        🔥 Streaks & Perfect Days
       </h2>
       <p className="text-xs text-zinc-500 mb-4">
-        Perfect days = $0 penalty
+        Consecutive days with $0 penalty
       </p>
 
       <div className="space-y-4">
@@ -37,35 +37,34 @@ export default function PerfectDaysTracker({ users }: PerfectDaysTrackerProps) {
             key={user.name}
             className={`p-4 rounded-lg border-2 ${
               index === 0
-                ? "border-yellow-400 bg-yellow-50"
+                ? "border-orange-400 bg-orange-50"
                 : "border-zinc-200 bg-zinc-50"
             }`}
           >
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-3">
-                {index === 0 && <span className="text-2xl">👑</span>}
+                {index === 0 && <span className="text-2xl">🔥</span>}
                 <div>
                   <p className="font-bold text-zinc-900 text-lg">
                     {user.name}
                   </p>
                   <p className="text-sm text-zinc-600">
-                    {user.perfectDays} perfect day{user.perfectDays !== 1 ? "s" : ""}
+                    {user.currentStreak} day streak
                   </p>
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-3xl font-bold text-green-600">
-                  {user.perfectDays}
+                <div className="text-3xl font-bold text-orange-600">
+                  {user.currentStreak}
                 </div>
               </div>
             </div>
 
             <div className="flex gap-4 pt-3 border-t border-zinc-200">
               <div className="flex-1 text-center">
-                <p className="text-xs text-zinc-600 mb-1">Current Streak</p>
-                <p className="text-lg font-bold text-orange-600 flex items-center justify-center gap-1">
-                  {user.currentStreak > 0 && "🔥"}
-                  {user.currentStreak}
+                <p className="text-xs text-zinc-600 mb-1">Perfect Days</p>
+                <p className="text-lg font-bold text-green-600 flex items-center justify-center gap-1">
+                  {user.perfectDays}
                 </p>
               </div>
               <div className="flex-1 text-center border-l border-zinc-200">
