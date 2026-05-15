@@ -13,6 +13,8 @@ type CheckInFormProps = {
   slug: string;
   tasks: Task[];
   totalPenalty: number;
+  currentPosition: number;
+  share: number;
 };
 
 export default function CheckInForm({
@@ -20,6 +22,8 @@ export default function CheckInForm({
   slug,
   tasks,
   totalPenalty,
+  currentPosition,
+  share,
 }: CheckInFormProps) {
   const router = useRouter();
   const [checkedTasks, setCheckedTasks] = useState<Record<number, boolean>>({
@@ -72,6 +76,7 @@ export default function CheckInForm({
   const completedCount = Object.values(checkedTasks).filter(Boolean).length;
   const missedCount = 5 - completedCount;
   const estimatedPenalty = Math.min(missedCount * 2, 10);
+  const newPosition = share - (totalPenalty + estimatedPenalty);
 
   return (
     <form onSubmit={handleSubmit}>
@@ -143,8 +148,17 @@ export default function CheckInForm({
             ${estimatedPenalty}
           </span>
         </div>
-        <div className="text-sm text-zinc-500 mt-1">
-          New total: ${totalPenalty + estimatedPenalty}
+        <div className="flex justify-between items-center text-sm mt-2 pt-2 border-t border-zinc-300">
+          <span className="text-zinc-600">Current Position:</span>
+          <span className={`font-bold ${currentPosition >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+            {currentPosition >= 0 ? '+' : ''}${currentPosition.toFixed(2)}
+          </span>
+        </div>
+        <div className="flex justify-between items-center text-sm mt-1">
+          <span className="text-zinc-600">New Position:</span>
+          <span className={`font-bold ${newPosition >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+            {newPosition >= 0 ? '+' : ''}${newPosition.toFixed(2)}
+          </span>
         </div>
       </div>
 

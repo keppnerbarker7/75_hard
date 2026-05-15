@@ -52,6 +52,43 @@ export default async function CheckInPage({
     0
   );
 
+  // Calculate pool and position info
+  const allUsers = await prisma.user.findMany({
+    include: { checkIns: true },
+  });
+
+  const groupSize = allUsers.length;
+
+  // Calculate how many days have passed since start (using MT timezone)
+  const startDateStr = new Date(user.group.startDate).toLocaleDateString("en-CA", {
+    timeZone: "America/Denver",
+  });
+  const todayStr = new Date().toLocaleDateString("en-CA", {
+    timeZone: "America/Denver",
+  });
+
+  const startDate = new Date(startDateStr);
+  const todayDate = new Date(todayStr);
+  const daysPassed = Math.floor(
+    (todayDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
+  ) + 1; // +1 to include start day
+
+  // Calculate total pool including penalties for unrecorded days
+  const recordedPenalties = allUsers.reduce((sum, u) => {
+    return sum + u.checkIns.reduce((s, c) => s + c.penalty, 0);
+  }, 0);
+
+  const totalRecordedDays = allUsers.reduce((sum, u) => sum + u.checkIns.length, 0);
+  const expectedTotalDays = daysPassed * groupSize;
+  const missingDays = expectedTotalDays - totalRecordedDays;
+  const unrecordedPenalties = missingDays * 10;
+
+  const poolTotal = recordedPenalties + unrecordedPenalties;
+
+  // Calculate user's current position
+  const share = poolTotal / groupSize;
+  const currentPosition = share - totalPenalty;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 flex items-center justify-center p-4">
       <div className="w-full max-w-2xl">
@@ -70,7 +107,9 @@ export default async function CheckInPage({
               })}
             </p>
             <p className="text-sm text-zinc-500 mt-2">
-              Total penalties: <span className="font-bold">${totalPenalty}</span>
+              Current Position: <span className={`font-bold ${currentPosition >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                {currentPosition >= 0 ? '+' : ''}${currentPosition.toFixed(2)}
+              </span>
             </p>
           </div>
 
@@ -183,6 +222,8 @@ export default async function CheckInPage({
               slug={slug}
               tasks={TASKS}
               totalPenalty={totalPenalty}
+              currentPosition={currentPosition}
+              share={share}
             />
           )}
 
