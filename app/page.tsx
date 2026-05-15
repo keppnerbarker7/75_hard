@@ -130,19 +130,30 @@ export default async function Dashboard() {
     };
   });
 
-  // Sort by net position (highest to lowest)
-  leaderboardData.sort((a, b) => b.netPosition - a.netPosition);
-
   // Calculate perfect days and streaks for each user
   const perfectDaysData = users.map((user) => {
     const streakData = calculateStreakData(user.checkIns);
     return {
       name: user.name,
+      slug: user.slug,
       perfectDays: streakData.perfectDays,
       currentStreak: streakData.currentStreak,
       longestStreak: streakData.longestStreak,
     };
   });
+
+  // Merge perfect days data into leaderboard
+  const leaderboardWithPerfectDays = leaderboardData.map((user) => {
+    const perfectData = perfectDaysData.find((p) => p.slug === user.slug);
+    return {
+      ...user,
+      perfectDays: perfectData?.perfectDays || 0,
+      currentStreak: perfectData?.currentStreak || 0,
+    };
+  });
+
+  // Sort by net position (highest to lowest)
+  leaderboardWithPerfectDays.sort((a, b) => b.netPosition - a.netPosition);
 
   // Calculate task success rates from all check-ins
   const allCheckIns = users.flatMap((user) => user.checkIns);
@@ -187,7 +198,7 @@ export default async function Dashboard() {
             Today's Check-Ins
           </h2>
           <div className="flex flex-wrap gap-2">
-            {leaderboardData.map((user) => (
+            {leaderboardWithPerfectDays.map((user) => (
               <div
                 key={user.slug}
                 className={`px-4 py-2 rounded-lg font-medium ${
@@ -224,7 +235,7 @@ export default async function Dashboard() {
                     Name
                   </th>
                   <th className="px-6 py-3 text-center text-xs font-medium text-zinc-600 uppercase tracking-wider">
-                    Days
+                    Perfect Days
                   </th>
                   <th className="px-6 py-3 text-center text-xs font-medium text-zinc-600 uppercase tracking-wider">
                     Penalties
@@ -235,7 +246,7 @@ export default async function Dashboard() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-zinc-200">
-                {leaderboardData.map((user, index) => (
+                {leaderboardWithPerfectDays.map((user, index) => (
                   <tr
                     key={user.slug}
                     className={index === 0 ? "bg-yellow-50" : ""}
@@ -254,7 +265,16 @@ export default async function Dashboard() {
                       </a>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center">
-                      <span className="text-zinc-900">{user.daysCompleted}</span>
+                      <div className="flex items-center justify-center gap-2">
+                        <span className="text-lg font-bold text-green-600">
+                          {user.perfectDays}
+                        </span>
+                        {user.currentStreak > 0 && (
+                          <span className="text-sm text-orange-600 font-medium">
+                            🔥{user.currentStreak}
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center">
                       <span className="text-red-600 font-medium">
