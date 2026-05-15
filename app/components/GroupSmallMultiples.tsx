@@ -123,24 +123,24 @@ export default function GroupSmallMultiples({ users }: GroupSmallMultiplesProps)
               </div>
 
               <svg
-                viewBox="0 0 280 120"
+                viewBox="0 0 280 80"
                 className="w-full h-auto"
-                style={{ minHeight: "80px" }}
+                style={{ minHeight: "50px" }}
               >
                 {/* Grid lines */}
                 {[0, 50, 100].map((percent) => (
                   <g key={percent}>
                     <line
                       x1="30"
-                      y1={100 - (percent * 80) / 100}
+                      y1={65 - (percent * 50) / 100}
                       x2="270"
-                      y2={100 - (percent * 80) / 100}
+                      y2={65 - (percent * 50) / 100}
                       stroke="#e5e7eb"
                       strokeWidth="0.5"
                     />
                     <text
                       x="20"
-                      y={100 - (percent * 80) / 100 + 3}
+                      y={65 - (percent * 50) / 100 + 3}
                       fill="#9ca3af"
                       fontSize="10"
                       fontWeight="500"
@@ -155,9 +155,9 @@ export default function GroupSmallMultiples({ users }: GroupSmallMultiplesProps)
                 {chartData.slice(0, -1).map((point, i) => {
                   const nextPoint = chartData[i + 1];
                   const x1 = 30 + (i / (visibleDays - 1 || 1)) * 240;
-                  const y1 = 100 - (point.completionRate * 80) / 100;
+                  const y1 = 65 - (point.completionRate * 50) / 100;
                   const x2 = 30 + ((i + 1) / (visibleDays - 1 || 1)) * 240;
-                  const y2 = 100 - (nextPoint.completionRate * 80) / 100;
+                  const y2 = 65 - (nextPoint.completionRate * 50) / 100;
 
                   const color = getLineColor(point.completionRate);
 
@@ -178,7 +178,7 @@ export default function GroupSmallMultiples({ users }: GroupSmallMultiplesProps)
                 {/* Data points */}
                 {chartData.map((point, i) => {
                   const x = 30 + (i / (visibleDays - 1 || 1)) * 240;
-                  const y = 100 - (point.completionRate * 80) / 100;
+                  const y = 65 - (point.completionRate * 50) / 100;
                   const color = getLineColor(point.completionRate);
 
                   return (
@@ -194,7 +194,7 @@ export default function GroupSmallMultiples({ users }: GroupSmallMultiplesProps)
                   <>
                     <text
                       x="30"
-                      y="115"
+                      y="75"
                       fill="#9ca3af"
                       fontSize="10"
                       fontWeight="500"
@@ -205,7 +205,7 @@ export default function GroupSmallMultiples({ users }: GroupSmallMultiplesProps)
                     {chartData.length > 1 && (
                       <text
                         x="270"
-                        y="115"
+                        y="75"
                         fill="#9ca3af"
                         fontSize="10"
                         fontWeight="500"
@@ -217,14 +217,6 @@ export default function GroupSmallMultiples({ users }: GroupSmallMultiplesProps)
                   </>
                 )}
               </svg>
-
-              {/* Current completion rate */}
-              <div className="text-center mt-2">
-                <span className="text-lg font-bold" style={{ color: USER_COLORS[userIdx % USER_COLORS.length] }}>
-                  {chartData.length > 0 ? Math.round(chartData[chartData.length - 1].completionRate) : 0}%
-                </span>
-                <span className="text-xs text-zinc-500 ml-1">recent</span>
-              </div>
             </div>
           );
         })}
