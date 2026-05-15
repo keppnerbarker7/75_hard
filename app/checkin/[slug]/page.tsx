@@ -90,11 +90,11 @@ export default async function CheckInPage({
 
   const poolTotal = recordedPenalties + unrecordedPenalties;
 
-  // Calculate user's current position (what's on the leaderboard)
-  // This includes the assumed $10 penalty for today if they haven't checked in yet
-  const share = poolTotal / groupSize;
-  const totalPenaltyIncludingToday = totalPenalty + userMissingPenalty;
-  const currentPosition = share - totalPenaltyIncludingToday;
+  // Calculate user's current position (as of yesterday, before today's check-in)
+  // Remove the $10 assumption for today to get the "real" current position
+  const currentPoolWithoutToday = poolTotal - userMissingPenalty;
+  const currentShare = currentPoolWithoutToday / groupSize;
+  const currentPosition = currentShare - totalPenalty;
 
   // Calculate group average completion rate (same as Task Success Rates on dashboard)
   const realCheckIns = allUsers.flatMap(u => u.checkIns.filter(c => !c.isAutoFilled));
@@ -249,7 +249,7 @@ export default async function CheckInPage({
               tasks={TASKS}
               totalPenalty={totalPenalty}
               currentPosition={currentPosition}
-              poolTotal={poolTotal}
+              currentPoolWithoutToday={currentPoolWithoutToday}
               groupSize={groupSize}
               groupAvgCompletionRate={groupAvgCompletionRate}
               groupAvgPenalty={groupAvgPenalty}

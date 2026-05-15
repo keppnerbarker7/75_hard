@@ -14,7 +14,7 @@ type CheckInFormProps = {
   tasks: Task[];
   totalPenalty: number;
   currentPosition: number;
-  poolTotal: number;
+  currentPoolWithoutToday: number;
   groupSize: number;
   groupAvgCompletionRate: number;
   groupAvgPenalty: number;
@@ -26,7 +26,7 @@ export default function CheckInForm({
   tasks,
   totalPenalty,
   currentPosition,
-  poolTotal,
+  currentPoolWithoutToday,
   groupSize,
   groupAvgCompletionRate,
   groupAvgPenalty,
@@ -83,12 +83,12 @@ export default function CheckInForm({
   const missedCount = 5 - completedCount;
   const estimatedPenalty = Math.min(missedCount * 2, 10);
 
-  // Calculate estimated new position - SIMPLIFIED
-  // Current position already includes $10 assumption for you today
-  // When you submit: pool changes by (actual - $10), your penalties change by actual
-  const newPoolTotal = poolTotal - 10 + estimatedPenalty;
+  // Calculate estimated new position
+  // Assume everyone else performs at group average
+  const othersExpectedPenalties = (groupSize - 1) * groupAvgPenalty;
+  const newPoolTotal = currentPoolWithoutToday + estimatedPenalty + othersExpectedPenalties;
   const newShare = newPoolTotal / groupSize;
-  const newTotalPenalty = totalPenalty + estimatedPenalty; // Your actual recorded penalties
+  const newTotalPenalty = totalPenalty + estimatedPenalty;
   const estimatedNewPosition = newShare - newTotalPenalty;
 
   return (
