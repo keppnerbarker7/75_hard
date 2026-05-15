@@ -1,10 +1,10 @@
 import { prisma } from "@/lib/prisma";
-import PerfectDaysTracker, {
-  calculateStreakData,
-} from "./components/PerfectDaysTracker";
+import { calculateStreakData } from "./components/PerfectDaysTracker";
 import TaskSuccessRate, {
   calculateTaskStats,
 } from "./components/TaskSuccessRate";
+import GroupCompletionChart from "./components/GroupCompletionChart";
+import GroupHeatmap from "./components/GroupHeatmap";
 
 export const dynamic = "force-dynamic";
 
@@ -281,7 +281,7 @@ export default async function Dashboard() {
                         {user.netPosition.toFixed(2)}
                       </div>
                       <div className="text-xs text-zinc-500 mt-1">
-                        {user.perfectDays} perfect
+                        {user.perfectDays} perfect days
                       </div>
                     </div>
                   </div>
@@ -295,7 +295,12 @@ export default async function Dashboard() {
         {/* Stats Sections */}
         <div className="grid grid-cols-1 gap-4 md:gap-6">
           <TaskSuccessRate taskStats={taskStats} />
-          <PerfectDaysTracker users={perfectDaysData} />
+
+          {/* Option 1: Multi-Line Chart */}
+          <GroupCompletionChart users={users} />
+
+          {/* Option 3: Heatmap */}
+          <GroupHeatmap users={users} />
         </div>
       </div>
     </div>
