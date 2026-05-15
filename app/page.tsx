@@ -213,7 +213,25 @@ export default async function Dashboard() {
                 <span>🏆</span> Leaderboard
               </h2>
             </div>
-            <div className="p-4">
+
+            {/* Column Headers */}
+            <div className="px-4 pt-4 pb-2">
+              <div className="flex items-center justify-between px-3 pb-2 border-b-2 border-zinc-200">
+                <div className="flex items-center gap-3">
+                  <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider min-w-[2rem]">
+                    Rank
+                  </span>
+                  <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider">
+                    Name
+                  </span>
+                </div>
+                <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider">
+                  Net Position
+                </span>
+              </div>
+            </div>
+
+            <div className="px-4 pb-4">
               <div className="space-y-3">
                 {leaderboardWithPerfectDays.map((user, index) => (
                   <div
@@ -271,6 +289,7 @@ export default async function Dashboard() {
               </div>
             </div>
           </div>
+
         </div>
 
         {/* Stats Sections */}
