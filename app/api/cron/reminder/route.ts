@@ -113,21 +113,20 @@ export async function GET(request: NextRequest) {
 
         let currentStreak = 0;
         let perfectDays = 0;
+        let streakActive = true;
 
         // Count perfect days and current streak
         for (let i = 0; i < allUserCheckIns.length; i++) {
           const checkIn = allUserCheckIns[i];
           if (checkIn.penalty === 0) {
             perfectDays++;
-            if (i === allUserCheckIns.length - 1 || currentStreak > 0) {
+            // Only count toward current streak if we haven't broken it yet
+            if (streakActive) {
               currentStreak++;
             }
-          } else if (i === allUserCheckIns.length - 1) {
-            // Most recent check-in had penalty, no current streak
-            break;
           } else {
-            // Streak broken
-            break;
+            // Hit a penalty - streak is broken
+            streakActive = false;
           }
         }
 

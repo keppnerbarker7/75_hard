@@ -153,18 +153,18 @@ export default async function UserStatsPage({
                   <div key={task.taskName}>
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
-                        <span>{task.emoji}</span>
-                        <span className="font-medium text-sm">
+                        <span className="text-lg">{task.emoji}</span>
+                        <span className="font-semibold text-sm text-zinc-900">
                           {task.taskName}
                         </span>
                       </div>
                       <div className="text-right">
-                        <span className="font-bold text-zinc-900">
+                        <span className="font-bold text-lg text-zinc-900">
                           {userRate}%
                         </span>
                         {diff !== 0 && (
                           <span
-                            className={`text-xs ml-2 ${
+                            className={`text-sm ml-2 font-semibold ${
                               diff > 0 ? "text-green-600" : "text-red-600"
                             }`}
                           >
@@ -174,9 +174,9 @@ export default async function UserStatsPage({
                         )}
                       </div>
                     </div>
-                    <div className="relative w-full bg-zinc-200 rounded-full h-2">
+                    <div className="relative w-full bg-zinc-200 rounded-full h-3">
                       <div
-                        className={`absolute h-2 rounded-full ${
+                        className={`absolute h-3 rounded-full ${
                           userRate >= 80
                             ? "bg-green-500"
                             : userRate >= 60
@@ -187,12 +187,12 @@ export default async function UserStatsPage({
                       />
                       {/* Group average marker */}
                       <div
-                        className="absolute top-0 h-2 w-0.5 bg-zinc-900"
+                        className="absolute top-0 h-3 w-0.5 bg-zinc-900"
                         style={{ left: `${groupRate}%` }}
                         title={`Group avg: ${groupRate}%`}
                       />
                     </div>
-                    <p className="text-xs text-zinc-500 mt-1">
+                    <p className="text-sm text-zinc-600 mt-1 font-medium">
                       {task.completed}/{task.total} completed · Group avg:{" "}
                       {groupRate}%
                     </p>
