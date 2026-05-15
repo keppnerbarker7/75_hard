@@ -15,7 +15,7 @@ type CompletionChartProps = {
 type ViewMode = "5" | "10" | "all";
 
 export default function CompletionChart({ chartData }: CompletionChartProps) {
-  const [viewMode, setViewMode] = useState<ViewMode>("5");
+  const [viewMode, setViewMode] = useState<ViewMode>("10");
 
   const getDaysToShow = () => {
     if (viewMode === "all") return chartData.length;
