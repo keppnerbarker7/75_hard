@@ -294,8 +294,8 @@ export default async function Dashboard() {
 
         {/* Stats Sections */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <PerfectDaysTracker users={perfectDaysData} />
           <TaskSuccessRate taskStats={taskStats} />
+          <PerfectDaysTracker users={perfectDaysData} />
         </div>
       </div>
     </div>
