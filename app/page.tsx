@@ -69,9 +69,16 @@ export default async function Dashboard() {
   const group = users[0].group;
   const groupSize = users.length;
 
-  // Calculate how many days have passed since start
-  const startDate = new Date(group.startDate);
-  const todayDateForCalc = new Date();
+  // Calculate how many days have passed since start (using MT timezone)
+  const startDateStr = new Date(group.startDate).toLocaleDateString("en-CA", {
+    timeZone: "America/Denver",
+  });
+  const todayStr = new Date().toLocaleDateString("en-CA", {
+    timeZone: "America/Denver",
+  });
+
+  const startDate = new Date(startDateStr);
+  const todayDateForCalc = new Date(todayStr);
   const daysPassed = Math.floor(
     (todayDateForCalc.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
   ) + 1; // +1 to include start day
