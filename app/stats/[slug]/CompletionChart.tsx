@@ -33,9 +33,9 @@ export default function CompletionChart({ chartData }: CompletionChartProps) {
   };
 
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-lg mb-6">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-bold text-zinc-900">
+    <div className="bg-white rounded-2xl p-4 shadow-lg mb-6">
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="text-lg font-bold text-zinc-900">
           Daily Task Completion
         </h2>
         <div className="flex items-center gap-2 bg-zinc-100 rounded-lg p-1">
@@ -72,28 +72,28 @@ export default function CompletionChart({ chartData }: CompletionChartProps) {
         </div>
       </div>
 
-      <div className="w-full">
+      <div className="w-full -my-2">
         <svg
-          viewBox="0 0 800 280"
+          viewBox="0 0 800 240"
           className="w-full h-auto"
-          style={{ minHeight: "220px" }}
+          style={{ minHeight: "180px" }}
         >
           {/* Grid lines */}
           {[0, 25, 50, 75, 100].map((percent) => (
             <g key={percent}>
               <line
                 x1="80"
-                y1={230 - (percent * 200) / 100}
+                y1={200 - (percent * 180) / 100}
                 x2="770"
-                y2={230 - (percent * 200) / 100}
+                y2={200 - (percent * 180) / 100}
                 stroke="#e5e7eb"
                 strokeWidth="1"
               />
               <text
                 x="60"
-                y={230 - (percent * 200) / 100 + 6}
+                y={200 - (percent * 180) / 100 + 5}
                 fill="#6b7280"
-                fontSize="16"
+                fontSize="15"
                 fontWeight="600"
                 textAnchor="end"
               >
@@ -106,9 +106,9 @@ export default function CompletionChart({ chartData }: CompletionChartProps) {
           {visibleData.slice(0, -1).map((point, i) => {
             const nextPoint = visibleData[i + 1];
             const x1 = 80 + (i / (visibleData.length - 1 || 1)) * 690;
-            const y1 = 230 - (point.completionRate * 200) / 100;
+            const y1 = 200 - (point.completionRate * 180) / 100;
             const x2 = 80 + ((i + 1) / (visibleData.length - 1 || 1)) * 690;
-            const y2 = 230 - (nextPoint.completionRate * 200) / 100;
+            const y2 = 200 - (nextPoint.completionRate * 180) / 100;
 
             // Use the color of the starting point for the segment
             const color = getLineColor(point.completionRate);
@@ -130,13 +130,13 @@ export default function CompletionChart({ chartData }: CompletionChartProps) {
           {/* Data points */}
           {visibleData.map((point, i) => {
             const x = 80 + (i / (visibleData.length - 1 || 1)) * 690;
-            const y = 230 - (point.completionRate * 200) / 100;
+            const y = 200 - (point.completionRate * 180) / 100;
             const color = getLineColor(point.completionRate);
 
             return (
               <g key={i}>
-                <circle cx={x} cy={y} r="7" fill={color} />
-                <circle cx={x} cy={y} r="4" fill="white" />
+                <circle cx={x} cy={y} r="6" fill={color} />
+                <circle cx={x} cy={y} r="3" fill="white" />
               </g>
             );
           })}
@@ -156,9 +156,9 @@ export default function CompletionChart({ chartData }: CompletionChartProps) {
                 <text
                   key={i}
                   x={x}
-                  y="260"
+                  y="225"
                   fill="#6b7280"
-                  fontSize="16"
+                  fontSize="15"
                   fontWeight="600"
                   textAnchor="middle"
                 >
@@ -169,7 +169,7 @@ export default function CompletionChart({ chartData }: CompletionChartProps) {
         </svg>
       </div>
 
-      <div className="flex justify-center gap-4 mt-3 text-xs">
+      <div className="flex justify-center gap-4 mt-1 text-xs">
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-3 rounded-full bg-green-500"></div>
           <span className="text-zinc-600">100%</span>
