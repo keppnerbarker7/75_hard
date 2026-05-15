@@ -9,22 +9,24 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Get today's date in MT timezone (since this runs at midnight, "today" is the day that just ended)
-    const today = new Date().toLocaleDateString("en-CA", {
+    // Get yesterday's date in MT timezone (this runs at midnight MT, so we autofill the day that just ended)
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = yesterday.toLocaleDateString("en-CA", {
       timeZone: "America/Denver",
     });
 
     // Get all users
     const users = await prisma.user.findMany();
 
-    // Find users who haven't checked in today
+    // Find users who haven't checked in yesterday
     const results = await Promise.all(
       users.map(async (user) => {
         const existingCheckIn = await prisma.checkIn.findUnique({
           where: {
             userId_date: {
               userId: user.id,
-              date: today,
+              date: yesterdayStr,
             },
           },
         });
@@ -41,7 +43,7 @@ export async function GET(request: NextRequest) {
         const checkIn = await prisma.checkIn.create({
           data: {
             userId: user.id,
-            date: today,
+            date: yesterdayStr,
             task1: false,
             task2: false,
             task3: false,
@@ -56,7 +58,7 @@ export async function GET(request: NextRequest) {
           user: user.name,
           action: "auto-filled",
           penalty: checkIn.penalty,
-          date: today,
+          date: yesterdayStr,
         };
       })
     );

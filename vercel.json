@@ -2,19 +2,19 @@
   "crons": [
     {
       "path": "/api/cron/reminder",
-      "schedule": "0 21 * * *"
+      "schedule": "0 3 * * *"
     },
     {
       "path": "/api/cron/autofill",
-      "schedule": "0 0 * * *"
+      "schedule": "0 6 * * *"
     },
     {
       "path": "/api/cron/correction",
-      "schedule": "0 8 * * *"
+      "schedule": "0 14 * * *"
     },
     {
       "path": "/api/cron/weekly-recap",
-      "schedule": "0 20 * * 0"
+      "schedule": "0 2 * * 1"
     }
   ]
 }
