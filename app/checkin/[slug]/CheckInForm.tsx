@@ -138,7 +138,7 @@ export default function CheckInForm({
               </div>
             </div>
             <span
-              className={`text-lg font-medium ${
+              className={`text-base font-medium ${
                 checkedTasks[task.id] ? "text-green-900" : "text-zinc-900"
               }`}
             >

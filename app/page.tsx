@@ -182,7 +182,7 @@ export default async function Dashboard() {
             75 Hard Challenge
           </h1>
           <p className="text-zinc-400 text-sm md:text-base">{group.name}</p>
-          <div className="mt-4 inline-block bg-white/10 backdrop-blur-sm px-6 py-3 rounded-full">
+          <div className="mt-4 inline-flex items-baseline bg-white/10 backdrop-blur-sm px-6 py-3 rounded-full">
             <span className="text-zinc-300 text-sm font-medium">Days Remaining: </span>
             <span className="text-white text-2xl font-bold ml-2">{daysRemaining}</span>
           </div>

@@ -40,9 +40,10 @@ export async function GET(request: NextRequest) {
     });
     const startDate = new Date(startDateStr);
     const todayDate = new Date(todayStr);
+    // Days passed EXCLUDING today (only count complete days)
     const daysPassed = Math.floor(
       (todayDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
-    ) + 1;
+    );
 
     // Calculate leaderboard with net positions
     const leaderboard = await Promise.all(

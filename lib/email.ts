@@ -84,7 +84,7 @@ export function getReminderEmailHtml(
             ${yesterdaySection}
 
             <div style="margin: 32px 0;">
-              <a href="${checkInUrl}" style="display: inline-block; background: #18181b; color: white; text-decoration: none; padding: 16px 32px; border-radius: 8px; font-weight: 600; font-size: 16px;">
+              <a href="${checkInUrl}" style="display: inline-block; background: #18181b; color: white; text-decoration: none; padding: 16px 32px; border-radius: 8px; font-weight: 600; font-size: 14px;">
                 Submit Today's Check-In
               </a>
             </div>
@@ -92,12 +92,11 @@ export function getReminderEmailHtml(
             <h2 style="color: #18181b; font-size: 18px; font-weight: 600; margin: 32px 0 12px;">Current Standings</h2>
             <div style="background: #f4f4f5; border-radius: 8px; padding: 16px;">
               ${leaderboard
-                .slice(0, 6)
                 .map(
                   (entry, i) => `
                 <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: ${i < leaderboard.length - 1 ? "1px solid #e4e4e7" : "none"};">
                   <span style="color: #18181b;">${i === 0 ? "🏆" : `${i + 1}.`} ${entry.name}</span>
-                  <span style="color: ${entry.netPosition >= 0 ? "#16a34a" : "#dc2626"}; font-weight: 700;">${entry.netPosition >= 0 ? "+" : ""}$${entry.netPosition.toFixed(2)}</span>
+                  <span style="color: ${entry.netPosition >= 0 ? "#16a34a" : "#dc2626"}; font-weight: 700; text-align: left;">${entry.netPosition >= 0 ? "+" : ""}$${entry.netPosition.toFixed(2)}</span>
                 </div>
               `
                 )
