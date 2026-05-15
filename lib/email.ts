@@ -51,16 +51,16 @@ export function getReminderEmailHtml(
 
   const streakSection = streakData
     ? `
-      <div style="background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); border-radius: 12px; padding: 20px; margin: 24px 0; text-align: center;">
-        <div style="font-size: 14px; color: #78350f; font-weight: 600; margin-bottom: 8px;">PERFECT DAY STREAK</div>
-        <div style="font-size: 48px; font-weight: 800; color: white; margin-bottom: 8px;">
+      <div style="background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%); border-radius: 12px; padding: 20px; margin: 24px 0; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <div style="font-size: 12px; color: rgba(255,255,255,0.9); font-weight: 600; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;">Perfect Day Streak</div>
+        <div style="font-size: 56px; font-weight: 800; color: white; margin-bottom: 8px; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">
           ${streakData.currentStreak > 0 ? "🔥" : "💀"} ${streakData.currentStreak}
         </div>
-        <div style="font-size: 14px; color: #78350f; font-weight: 600;">
+        <div style="font-size: 15px; color: white; font-weight: 500;">
           ${streakData.currentStreak === 0 ? "Start a new perfect streak today!" : streakData.currentStreak === 1 ? "Keep it going!" : "Consecutive days with $0 penalty!"}
         </div>
-        <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.3); font-size: 13px; color: #78350f;">
-          Total Perfect Days (all time): <strong>${streakData.perfectDays}</strong>
+        <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.3); font-size: 13px; color: white;">
+          Total Perfect Days: <strong>${streakData.perfectDays}</strong>
         </div>
       </div>
     `

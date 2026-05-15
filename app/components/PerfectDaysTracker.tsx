@@ -24,54 +24,39 @@ export default function PerfectDaysTracker({ users }: PerfectDaysTrackerProps) {
 
   return (
     <div className="bg-white rounded-2xl p-6 shadow-lg">
-      <h2 className="text-xl font-bold text-zinc-900 mb-2 flex items-center gap-2">
+      <h2 className="text-xl font-bold text-zinc-900 mb-2">
         🔥 Streaks & Perfect Days
       </h2>
       <p className="text-xs text-zinc-500 mb-4">
         Consecutive days with $0 penalty
       </p>
 
-      <div className="space-y-4">
+      <div className="space-y-2">
         {sortedUsers.map((user, index) => (
           <div
             key={user.name}
-            className={`p-4 rounded-lg border-2 ${
+            className={`flex items-center justify-between px-4 py-3 rounded-lg ${
               index === 0
-                ? "border-orange-400 bg-orange-50"
-                : "border-zinc-200 bg-zinc-50"
+                ? "bg-orange-50 border-2 border-orange-300"
+                : "bg-zinc-50"
             }`}
           >
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-3">
-                {index === 0 && <span className="text-2xl">🔥</span>}
-                <div>
-                  <p className="font-bold text-zinc-900 text-lg">
-                    {user.name}
-                  </p>
-                  <p className="text-sm text-zinc-600">
-                    {user.currentStreak} day streak
-                  </p>
-                </div>
-              </div>
-              <div className="text-right">
-                <div className="text-3xl font-bold text-orange-600">
-                  {user.currentStreak}
-                </div>
-              </div>
+            <div className="flex items-center gap-3 flex-1">
+              <span className="text-lg">{index === 0 ? "🔥" : `${index + 1}.`}</span>
+              <span className="font-semibold text-zinc-900">{user.name}</span>
             </div>
-
-            <div className="flex gap-4 pt-3 border-t border-zinc-200">
-              <div className="flex-1 text-center">
-                <p className="text-xs text-zinc-600 mb-1">Perfect Days</p>
-                <p className="text-lg font-bold text-green-600 flex items-center justify-center gap-1">
-                  {user.perfectDays}
-                </p>
+            <div className="flex items-center gap-6">
+              <div className="text-center">
+                <span className="text-lg font-bold text-orange-600">
+                  {user.currentStreak}
+                </span>
+                <span className="text-xs text-zinc-500 ml-1">streak</span>
               </div>
-              <div className="flex-1 text-center border-l border-zinc-200">
-                <p className="text-xs text-zinc-600 mb-1">Longest Streak</p>
-                <p className="text-lg font-bold text-purple-600">
-                  {user.longestStreak}
-                </p>
+              <div className="text-center">
+                <span className="text-lg font-bold text-green-600">
+                  {user.perfectDays}
+                </span>
+                <span className="text-xs text-zinc-500 ml-1">perfect</span>
               </div>
             </div>
           </div>
