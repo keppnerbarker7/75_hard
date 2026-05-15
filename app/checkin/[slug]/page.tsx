@@ -97,23 +97,27 @@ export default async function CheckInPage({
   const currentPosition = share - totalPenaltyIncludingToday;
 
   // Calculate today's average penalty for projection
-  // Check how many people have checked in today
+  // Check how many people have checked in today (exclude auto-filled)
   const todayCheckIns = allUsers.flatMap(u =>
-    u.checkIns.filter(c => c.date === today)
+    u.checkIns.filter(c => c.date === today && !c.isAutoFilled)
   );
 
   let averagePenaltyForProjection: number;
+  let projectionSource: string;
+
   if (todayCheckIns.length > 0) {
-    // Use today's average
+    // Use today's average (only real check-ins)
     const totalTodayPenalties = todayCheckIns.reduce((sum, c) => sum + c.penalty, 0);
     averagePenaltyForProjection = totalTodayPenalties / todayCheckIns.length;
+    projectionSource = "today's average";
   } else {
-    // Fall back to overall average
-    const allRecordedCheckIns = allUsers.flatMap(u => u.checkIns);
-    const totalAllPenalties = allRecordedCheckIns.reduce((sum, c) => sum + c.penalty, 0);
-    averagePenaltyForProjection = allRecordedCheckIns.length > 0
-      ? totalAllPenalties / allRecordedCheckIns.length
-      : 2; // Default to $2 if no data
+    // Fall back to overall average (exclude auto-filled entries)
+    const realCheckIns = allUsers.flatMap(u => u.checkIns.filter(c => !c.isAutoFilled));
+    const totalRealPenalties = realCheckIns.reduce((sum, c) => sum + c.penalty, 0);
+    averagePenaltyForProjection = realCheckIns.length > 0
+      ? totalRealPenalties / realCheckIns.length
+      : 2; // Default to $2 (4/5 tasks) if no data
+    projectionSource = "overall average";
   }
 
   // Count how many people haven't checked in today (excluding current user)
@@ -259,6 +263,7 @@ export default async function CheckInPage({
               groupSize={groupSize}
               averagePenaltyForProjection={averagePenaltyForProjection}
               peopleNotCheckedInToday={peopleNotCheckedInToday}
+              projectionSource={projectionSource}
             />
           )}
 

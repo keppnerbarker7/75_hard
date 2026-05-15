@@ -18,6 +18,7 @@ type CheckInFormProps = {
   groupSize: number;
   averagePenaltyForProjection: number;
   peopleNotCheckedInToday: number;
+  projectionSource: string;
 };
 
 export default function CheckInForm({
@@ -30,6 +31,7 @@ export default function CheckInForm({
   groupSize,
   averagePenaltyForProjection,
   peopleNotCheckedInToday,
+  projectionSource,
 }: CheckInFormProps) {
   const router = useRouter();
   const [checkedTasks, setCheckedTasks] = useState<Record<number, boolean>>({
@@ -181,7 +183,7 @@ export default function CheckInForm({
           </span>
         </div>
         <div className="text-xs text-zinc-500 mt-2 italic">
-          * Assumes others perform at today's average (${averagePenaltyForProjection.toFixed(2)})
+          * Estimate based on {projectionSource}: ${averagePenaltyForProjection.toFixed(2)} avg penalty
         </div>
       </div>
 
