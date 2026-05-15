@@ -46,9 +46,9 @@ export default function GroupSmallMultiples({ users }: GroupSmallMultiplesProps)
   const maxDays = Math.max(...users.map(u => u.checkIns.length));
   const startIdx = Math.max(0, maxDays - daysToShow);
 
-  const getLineColor = (completionRate: number) => {
-    if (completionRate === 100) return "#22c55e";
-    if (completionRate >= 60) return "#3b82f6";
+  const getLineColor = (tasksCompleted: number) => {
+    if (tasksCompleted === 5) return "#22c55e";
+    if (tasksCompleted >= 3) return "#3b82f6";
     return "#ef4444";
   };
 
@@ -107,7 +107,7 @@ export default function GroupSmallMultiples({ users }: GroupSmallMultiplesProps)
 
             return {
               day: startIdx + index + 1,
-              completionRate: (tasksCompleted / 5) * 100,
+              tasksCompleted: tasksCompleted,
             };
           });
 
@@ -128,25 +128,25 @@ export default function GroupSmallMultiples({ users }: GroupSmallMultiplesProps)
                 style={{ minHeight: "50px" }}
               >
                 {/* Grid lines */}
-                {[0, 50, 100].map((percent) => (
-                  <g key={percent}>
+                {[0, 1, 2, 3, 4, 5].map((taskCount) => (
+                  <g key={taskCount}>
                     <line
                       x1="30"
-                      y1={65 - (percent * 50) / 100}
+                      y1={65 - (taskCount * 50) / 5}
                       x2="270"
-                      y2={65 - (percent * 50) / 100}
+                      y2={65 - (taskCount * 50) / 5}
                       stroke="#e5e7eb"
                       strokeWidth="0.5"
                     />
                     <text
                       x="20"
-                      y={65 - (percent * 50) / 100 + 3}
+                      y={65 - (taskCount * 50) / 5 + 3}
                       fill="#9ca3af"
                       fontSize="10"
                       fontWeight="500"
                       textAnchor="end"
                     >
-                      {percent}
+                      {taskCount}
                     </text>
                   </g>
                 ))}
@@ -155,11 +155,11 @@ export default function GroupSmallMultiples({ users }: GroupSmallMultiplesProps)
                 {chartData.slice(0, -1).map((point, i) => {
                   const nextPoint = chartData[i + 1];
                   const x1 = 30 + (i / (visibleDays - 1 || 1)) * 240;
-                  const y1 = 65 - (point.completionRate * 50) / 100;
+                  const y1 = 65 - (point.tasksCompleted * 50) / 5;
                   const x2 = 30 + ((i + 1) / (visibleDays - 1 || 1)) * 240;
-                  const y2 = 65 - (nextPoint.completionRate * 50) / 100;
+                  const y2 = 65 - (nextPoint.tasksCompleted * 50) / 5;
 
-                  const color = getLineColor(point.completionRate);
+                  const color = getLineColor(point.tasksCompleted);
 
                   return (
                     <line
@@ -178,8 +178,8 @@ export default function GroupSmallMultiples({ users }: GroupSmallMultiplesProps)
                 {/* Data points */}
                 {chartData.map((point, i) => {
                   const x = 30 + (i / (visibleDays - 1 || 1)) * 240;
-                  const y = 65 - (point.completionRate * 50) / 100;
-                  const color = getLineColor(point.completionRate);
+                  const y = 65 - (point.tasksCompleted * 50) / 5;
+                  const color = getLineColor(point.tasksCompleted);
 
                   return (
                     <g key={i}>

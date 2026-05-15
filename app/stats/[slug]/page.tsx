@@ -63,7 +63,7 @@ export default async function UserStatsPage({
 
     return {
       day: index + 1,
-      completionRate: (tasksCompleted / 5) * 100,
+      tasksCompleted: tasksCompleted,
       date: checkIn.date,
     };
   });

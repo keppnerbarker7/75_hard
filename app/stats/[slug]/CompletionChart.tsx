@@ -4,7 +4,7 @@ import { useState } from "react";
 
 type ChartDataPoint = {
   day: number;
-  completionRate: number;
+  tasksCompleted: number;
   date: string;
 };
 
@@ -26,9 +26,9 @@ export default function CompletionChart({ chartData }: CompletionChartProps) {
   const startIdx = Math.max(0, chartData.length - daysToShow);
   const visibleData = chartData.slice(startIdx);
 
-  const getLineColor = (completionRate: number) => {
-    if (completionRate === 100) return "#22c55e";
-    if (completionRate >= 60) return "#3b82f6";
+  const getLineColor = (tasksCompleted: number) => {
+    if (tasksCompleted === 5) return "#22c55e";
+    if (tasksCompleted >= 3) return "#3b82f6";
     return "#ef4444";
   };
 
@@ -79,25 +79,25 @@ export default function CompletionChart({ chartData }: CompletionChartProps) {
           style={{ minHeight: "180px" }}
         >
           {/* Grid lines */}
-          {[0, 25, 50, 75, 100].map((percent) => (
-            <g key={percent}>
+          {[0, 1, 2, 3, 4, 5].map((taskCount) => (
+            <g key={taskCount}>
               <line
                 x1="80"
-                y1={200 - (percent * 180) / 100}
+                y1={200 - (taskCount * 180) / 5}
                 x2="770"
-                y2={200 - (percent * 180) / 100}
+                y2={200 - (taskCount * 180) / 5}
                 stroke="#e5e7eb"
                 strokeWidth="1"
               />
               <text
                 x="60"
-                y={200 - (percent * 180) / 100 + 5}
+                y={200 - (taskCount * 180) / 5 + 5}
                 fill="#6b7280"
                 fontSize="15"
                 fontWeight="600"
                 textAnchor="end"
               >
-                {percent}%
+                {taskCount}
               </text>
             </g>
           ))}
@@ -106,12 +106,12 @@ export default function CompletionChart({ chartData }: CompletionChartProps) {
           {visibleData.slice(0, -1).map((point, i) => {
             const nextPoint = visibleData[i + 1];
             const x1 = 80 + (i / (visibleData.length - 1 || 1)) * 690;
-            const y1 = 200 - (point.completionRate * 180) / 100;
+            const y1 = 200 - (point.tasksCompleted * 180) / 5;
             const x2 = 80 + ((i + 1) / (visibleData.length - 1 || 1)) * 690;
-            const y2 = 200 - (nextPoint.completionRate * 180) / 100;
+            const y2 = 200 - (nextPoint.tasksCompleted * 180) / 5;
 
             // Use the color of the starting point for the segment
-            const color = getLineColor(point.completionRate);
+            const color = getLineColor(point.tasksCompleted);
 
             return (
               <line
@@ -130,8 +130,8 @@ export default function CompletionChart({ chartData }: CompletionChartProps) {
           {/* Data points */}
           {visibleData.map((point, i) => {
             const x = 80 + (i / (visibleData.length - 1 || 1)) * 690;
-            const y = 200 - (point.completionRate * 180) / 100;
-            const color = getLineColor(point.completionRate);
+            const y = 200 - (point.tasksCompleted * 180) / 5;
+            const color = getLineColor(point.tasksCompleted);
 
             return (
               <g key={i}>
@@ -172,15 +172,15 @@ export default function CompletionChart({ chartData }: CompletionChartProps) {
       <div className="flex justify-center gap-4 mt-1 text-xs">
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-3 rounded-full bg-green-500"></div>
-          <span className="text-zinc-600">100%</span>
+          <span className="text-zinc-600">5/5 tasks</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-          <span className="text-zinc-600">60-99%</span>
+          <span className="text-zinc-600">3-4 tasks</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-3 rounded-full bg-red-500"></div>
-          <span className="text-zinc-600">&lt;60%</span>
+          <span className="text-zinc-600">&lt;3 tasks</span>
         </div>
       </div>
     </div>
