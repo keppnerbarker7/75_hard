@@ -168,10 +168,10 @@ export default async function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 py-6 md:py-12 px-4">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8 md:mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">
+          <h1 className="text-4xl md:text-5xl xl:text-6xl font-bold text-white mb-2">
             75 Hard Challenge
           </h1>
           <p className="text-zinc-400 text-sm md:text-base">{group.name}</p>
@@ -182,11 +182,11 @@ export default async function Dashboard() {
         </div>
 
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 mb-4 md:mb-6">
 
           {/* Today's Check-Ins */}
-          <div className="bg-white rounded-2xl p-6 shadow-lg">
-            <h2 className="text-xl font-bold text-zinc-900 mb-4 flex items-center gap-2">
+          <div className="bg-white rounded-2xl p-4 md:p-6 shadow-lg">
+            <h2 className="text-lg md:text-xl font-bold text-zinc-900 mb-3 md:mb-4 flex items-center gap-2">
               <span>📋</span> Today's Check-Ins
             </h2>
             <div className="flex flex-wrap gap-2">
@@ -208,8 +208,8 @@ export default async function Dashboard() {
 
           {/* Leaderboard */}
           <div className="bg-white rounded-2xl overflow-hidden shadow-lg">
-            <div className="bg-gradient-to-r from-zinc-900 to-zinc-700 px-6 py-4">
-              <h2 className="text-xl font-bold text-white flex items-center gap-2">
+            <div className="bg-gradient-to-r from-zinc-900 to-zinc-700 px-4 md:px-6 py-3 md:py-4">
+              <h2 className="text-lg md:text-xl font-bold text-white flex items-center gap-2">
                 <span>🏆</span> Leaderboard
               </h2>
             </div>
@@ -293,7 +293,7 @@ export default async function Dashboard() {
         </div>
 
         {/* Stats Sections */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
           <TaskSuccessRate taskStats={taskStats} />
           <PerfectDaysTracker users={perfectDaysData} />
         </div>

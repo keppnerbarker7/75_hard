@@ -8,9 +8,9 @@ export const dynamic = "force-dynamic";
 export default async function UserStatsPage({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }) {
-  const { slug } = params;
+  const { slug } = await params;
 
   // Fetch user with all check-ins
   const user = await prisma.user.findUnique({
