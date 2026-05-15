@@ -17,23 +17,67 @@ export async function GET(request: NextRequest) {
       timeZone: "America/Denver",
     });
 
-    // Get all users
-    const users = await prisma.user.findMany();
+    // Get all users with group info
+    const users = await prisma.user.findMany({
+      include: {
+        group: true,
+      },
+    });
 
-    // Calculate leaderboard with ALL check-ins
+    const groupSize = users.length;
+
+    // Calculate how many days have passed (using MT timezone)
+    const group = users[0]?.group;
+    if (!group) {
+      return NextResponse.json({ error: "No group found" }, { status: 404 });
+    }
+
+    const startDateStr = new Date(group.startDate).toLocaleDateString("en-CA", {
+      timeZone: "America/Denver",
+    });
+    const todayStr = new Date().toLocaleDateString("en-CA", {
+      timeZone: "America/Denver",
+    });
+    const startDate = new Date(startDateStr);
+    const todayDate = new Date(todayStr);
+    const daysPassed = Math.floor(
+      (todayDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
+    ) + 1;
+
+    // Calculate leaderboard with net positions
     const leaderboard = await Promise.all(
       users.map(async (user) => {
         const allCheckIns = await prisma.checkIn.findMany({
           where: { userId: user.id },
         });
-        const totalPenalty = allCheckIns.reduce(
+
+        // Recorded penalties
+        const recordedPenalty = allCheckIns.reduce(
           (sum, checkIn) => sum + checkIn.penalty,
           0
         );
-        return { name: user.name, totalPenalty };
+
+        // Missing days penalty
+        const daysRecorded = allCheckIns.length;
+        const missingDays = Math.max(0, daysPassed - daysRecorded);
+        const missingPenalty = missingDays * 10;
+
+        const totalPenalty = recordedPenalty + missingPenalty;
+
+        // Calculate total pool for share calculation
+        const totalRecordedDays = users.length * daysPassed;
+        const allUsersCheckIns = await prisma.checkIn.findMany();
+        const recordedPenalties = allUsersCheckIns.reduce((sum, c) => sum + c.penalty, 0);
+        const totalMissingDays = totalRecordedDays - allUsersCheckIns.length;
+        const poolTotal = recordedPenalties + (totalMissingDays * 10);
+
+        const share = poolTotal / groupSize;
+        const netPosition = share - totalPenalty;
+
+        return { name: user.name, totalPenalty, netPosition };
       })
     );
-    leaderboard.sort((a, b) => a.totalPenalty - b.totalPenalty);
+    leaderboard.sort((a, b) => b.netPosition - a.netPosition);
 
     // Send email to each user
     const results = await Promise.all(

@@ -94,9 +94,9 @@ export function getReminderEmailHtml(
                 .slice(0, 6)
                 .map(
                   (entry, i) => `
-                <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: ${i < leaderboard.length - 1 ? "1px solid #e4e4e7" : "none"};">
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: ${i < leaderboard.length - 1 ? "1px solid #e4e4e7" : "none"};">
                   <span style="color: #18181b;">${i === 0 ? "🏆" : `${i + 1}.`} ${entry.name}</span>
-                  <span style="color: #dc2626; font-weight: 600;">$${entry.totalPenalty}</span>
+                  <span style="color: ${entry.netPosition >= 0 ? "#16a34a" : "#dc2626"}; font-weight: 700;">${entry.netPosition >= 0 ? "+" : ""}$${entry.netPosition.toFixed(2)}</span>
                 </div>
               `
                 )

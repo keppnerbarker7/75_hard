@@ -260,7 +260,7 @@ export default async function Dashboard() {
                         }`}
                       >
                         {user.netPosition >= 0 ? "+" : ""}$
-                        {user.netPosition.toFixed(0)}
+                        {user.netPosition.toFixed(2)}
                       </div>
                       <div className="text-xs text-zinc-500 mt-1">
                         {user.perfectDays} perfect
