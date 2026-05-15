@@ -182,7 +182,7 @@ export default async function Dashboard() {
         </div>
 
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 mb-4 md:mb-6">
+        <div className="grid grid-cols-1 gap-4 md:gap-6 mb-4 md:mb-6">
 
           {/* Today's Check-Ins */}
           <div className="bg-white rounded-2xl p-4 md:p-6 shadow-lg">
@@ -293,7 +293,7 @@ export default async function Dashboard() {
         </div>
 
         {/* Stats Sections */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+        <div className="grid grid-cols-1 gap-4 md:gap-6">
           <TaskSuccessRate taskStats={taskStats} />
           <PerfectDaysTracker users={perfectDaysData} />
         </div>
