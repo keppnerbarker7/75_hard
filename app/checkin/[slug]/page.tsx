@@ -69,9 +69,12 @@ export default async function CheckInPage({
 
   const startDate = new Date(startDateStr);
   const todayDate = new Date(todayStr);
+
+  // Days passed EXCLUDING today (only count complete days)
+  // Today isn't over yet, so don't penalize for it
   const daysPassed = Math.floor(
     (todayDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
-  ) + 1; // +1 to include start day
+  );
 
   // Calculate user's missing days (for current position on leaderboard)
   const userDaysRecorded = allCheckIns.length;
@@ -90,10 +93,9 @@ export default async function CheckInPage({
 
   const poolTotal = recordedPenalties + unrecordedPenalties;
 
-  // Calculate user's current position (as of yesterday, before today's check-in)
-  // Remove the $10 assumption for today to get the "real" current position
-  const currentPoolWithoutToday = poolTotal - userMissingPenalty;
-  const currentShare = currentPoolWithoutToday / groupSize;
+  // Calculate user's current position (what's on the dashboard right now)
+  // poolTotal now correctly excludes today since we removed the +1 from daysPassed
+  const currentShare = poolTotal / groupSize;
   const currentPosition = currentShare - totalPenalty;
 
   // Calculate group average completion rate (same as Task Success Rates on dashboard)
@@ -114,6 +116,11 @@ export default async function CheckInPage({
   // If they complete 80% of tasks, they miss 20% = 1 task = $2
   const avgTasksMissed = (1 - groupAvgCompletionRate) * 5;
   const groupAvgPenalty = Math.min(avgTasksMissed * 2, 10);
+
+  // Count how many people haven't checked in today (excluding current user)
+  const peopleNotCheckedInToday = allUsers.filter(u =>
+    u.id !== user.id && !u.checkIns.some(c => c.date === today && !c.isAutoFilled)
+  ).length;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 flex items-center justify-center p-4">
@@ -249,7 +256,7 @@ export default async function CheckInPage({
               tasks={TASKS}
               totalPenalty={totalPenalty}
               currentPosition={currentPosition}
-              currentPoolWithoutToday={currentPoolWithoutToday}
+              poolTotal={poolTotal}
               groupSize={groupSize}
               groupAvgCompletionRate={groupAvgCompletionRate}
               groupAvgPenalty={groupAvgPenalty}

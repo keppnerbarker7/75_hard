@@ -78,9 +78,10 @@ export default async function Dashboard() {
 
   const startDate = new Date(startDateStr);
   const todayDateForCalc = new Date(todayStr);
+  // Days passed EXCLUDING today (only count complete days)
   const daysPassed = Math.floor(
     (todayDateForCalc.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
-  ) + 1; // +1 to include start day
+  );
 
   // Calculate total pool including penalties for unrecorded days
   const recordedPenalties = users.reduce((sum, user) => {
