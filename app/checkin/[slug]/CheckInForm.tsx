@@ -10,7 +10,7 @@ type Task = {
 
 type CheckInFormProps = {
   slug: string;
-  tasks: Task[];
+  tasks: readonly Task[];
   totalPenalty: number;
   currentPosition: number;
   poolTotal: number;
