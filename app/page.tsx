@@ -172,21 +172,21 @@ export default async function Dashboard() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-          <div className="bg-white rounded-xl p-6 text-center">
-            <p className="text-zinc-600 text-sm font-medium mb-2">Pool Total</p>
-            <p className="text-4xl font-bold text-zinc-900">${poolTotal}</p>
-          </div>
-          <div className="bg-white rounded-xl p-6 text-center">
+          <div className="bg-white rounded-xl p-6 text-center col-span-1">
             <p className="text-zinc-600 text-sm font-medium mb-2">
               Days Remaining
             </p>
-            <p className="text-4xl font-bold text-zinc-900">{daysRemaining}</p>
+            <p className="text-5xl font-bold text-zinc-900">{daysRemaining}</p>
           </div>
-          <div className="bg-white rounded-xl p-6 text-center">
-            <p className="text-zinc-600 text-sm font-medium mb-2">
+          <div className="bg-zinc-100 rounded-xl p-4 text-center">
+            <p className="text-zinc-500 text-xs font-medium mb-1">Pool Total</p>
+            <p className="text-2xl font-semibold text-zinc-700">${poolTotal}</p>
+          </div>
+          <div className="bg-zinc-100 rounded-xl p-4 text-center">
+            <p className="text-zinc-500 text-xs font-medium mb-1">
               Each Share
             </p>
-            <p className="text-4xl font-bold text-zinc-900">
+            <p className="text-2xl font-semibold text-zinc-700">
               ${(poolTotal / groupSize).toFixed(2)}
             </p>
           </div>

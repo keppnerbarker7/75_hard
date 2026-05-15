@@ -51,15 +51,15 @@ export function getReminderEmailHtml(
   const streakSection = streakData
     ? `
       <div style="background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); border-radius: 12px; padding: 20px; margin: 24px 0; text-align: center;">
-        <div style="font-size: 14px; color: #78350f; font-weight: 600; margin-bottom: 8px;">YOUR STREAK</div>
+        <div style="font-size: 14px; color: #78350f; font-weight: 600; margin-bottom: 8px;">PERFECT DAY STREAK</div>
         <div style="font-size: 48px; font-weight: 800; color: white; margin-bottom: 8px;">
           ${streakData.currentStreak > 0 ? "🔥" : "💀"} ${streakData.currentStreak}
         </div>
         <div style="font-size: 14px; color: #78350f; font-weight: 600;">
-          ${streakData.currentStreak === 0 ? "Start a new streak today!" : streakData.currentStreak === 1 ? "Keep it going!" : "Perfect days in a row!"}
+          ${streakData.currentStreak === 0 ? "Start a new perfect streak today!" : streakData.currentStreak === 1 ? "Keep it going!" : "Consecutive days with $0 penalty!"}
         </div>
         <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.3); font-size: 13px; color: #78350f;">
-          Total Perfect Days: <strong>${streakData.perfectDays}</strong>
+          Total Perfect Days (all time): <strong>${streakData.perfectDays}</strong>
         </div>
       </div>
     `
