@@ -23,12 +23,12 @@ export default function PerfectDaysTracker({ users }: PerfectDaysTrackerProps) {
   const sortedUsers = [...users].sort((a, b) => b.perfectDays - a.perfectDays);
 
   return (
-    <div className="bg-white rounded-xl p-6 shadow-sm">
-      <h2 className="text-xl font-bold text-zinc-900 mb-4 flex items-center gap-2">
+    <div className="bg-white rounded-2xl p-6 shadow-lg">
+      <h2 className="text-xl font-bold text-zinc-900 mb-2 flex items-center gap-2">
         🔥 Perfect Days & Streaks
       </h2>
-      <p className="text-sm text-zinc-600 mb-6">
-        Perfect days = $0 penalty for the day
+      <p className="text-xs text-zinc-500 mb-4">
+        Perfect days = $0 penalty
       </p>
 
       <div className="space-y-4">

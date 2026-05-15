@@ -167,160 +167,108 @@ export default async function Dashboard() {
   const taskStats = calculateTaskStats(allCheckIns);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 py-12 px-4">
-      <div className="max-w-5xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 py-6 md:py-12 px-4">
+      <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold text-white mb-4">
+        <div className="text-center mb-8 md:mb-12">
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">
             75 Hard Challenge
           </h1>
-          <p className="text-zinc-300 text-lg">{group.name}</p>
-        </div>
-
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-          <div className="bg-white rounded-xl p-6 text-center col-span-1">
-            <p className="text-zinc-600 text-sm font-medium mb-2">
-              Days Remaining
-            </p>
-            <p className="text-5xl font-bold text-zinc-900">{daysRemaining}</p>
-          </div>
-          <div className="bg-zinc-100 rounded-xl p-4 text-center">
-            <p className="text-zinc-500 text-xs font-medium mb-1">Pool Total</p>
-            <p className="text-2xl font-semibold text-zinc-700">${poolTotal}</p>
-          </div>
-          <div className="bg-zinc-100 rounded-xl p-4 text-center">
-            <p className="text-zinc-500 text-xs font-medium mb-1">
-              Each Share
-            </p>
-            <p className="text-2xl font-semibold text-zinc-700">
-              ${(poolTotal / groupSize).toFixed(2)}
-            </p>
+          <p className="text-zinc-400 text-sm md:text-base">{group.name}</p>
+          <div className="mt-4 inline-block bg-white/10 backdrop-blur-sm px-6 py-3 rounded-full">
+            <span className="text-zinc-300 text-sm font-medium">Days Remaining: </span>
+            <span className="text-white text-2xl font-bold ml-2">{daysRemaining}</span>
           </div>
         </div>
 
-        {/* Today's Check-In Status */}
-        <div className="bg-white rounded-xl p-6 mb-8">
-          <h2 className="text-xl font-bold text-zinc-900 mb-4">
-            Today's Check-Ins
-          </h2>
-          <div className="flex flex-wrap gap-2">
-            {leaderboardWithPerfectDays.map((user) => (
-              <div
-                key={user.slug}
-                className={`px-4 py-2 rounded-lg font-medium ${
-                  user.checkedInToday
-                    ? "bg-green-100 text-green-800"
-                    : "bg-zinc-100 text-zinc-600"
-                }`}
-              >
-                {user.checkedInToday ? "✓" : "○"} {user.name}
-              </div>
-            ))}
-          </div>
-        </div>
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
 
-        {/* New Stats Sections */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-          <PerfectDaysTracker users={perfectDaysData} />
-          <TaskSuccessRate taskStats={taskStats} />
-        </div>
-
-        {/* Leaderboard */}
-        <div className="bg-white rounded-xl overflow-hidden">
-          <div className="bg-zinc-900 px-6 py-4">
-            <h2 className="text-xl font-bold text-white">Leaderboard</h2>
+          {/* Today's Check-Ins */}
+          <div className="bg-white rounded-2xl p-6 shadow-lg">
+            <h2 className="text-xl font-bold text-zinc-900 mb-4 flex items-center gap-2">
+              <span>📋</span> Today's Check-Ins
+            </h2>
+            <div className="flex flex-wrap gap-2">
+              {leaderboardWithPerfectDays.map((user) => (
+                <a
+                  key={user.slug}
+                  href={`/checkin/${user.slug}`}
+                  className={`px-4 py-2 rounded-lg font-medium transition-all hover:scale-105 active:scale-95 ${
+                    user.checkedInToday
+                      ? "bg-green-500 text-white shadow-md"
+                      : "bg-zinc-200 text-zinc-700 hover:bg-zinc-300"
+                  }`}
+                >
+                  {user.checkedInToday ? "✓" : "○"} {user.name}
+                </a>
+              ))}
+            </div>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-zinc-50 border-b border-zinc-200">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-zinc-600 uppercase tracking-wider">
-                    Rank
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-zinc-600 uppercase tracking-wider">
-                    Name
-                  </th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-zinc-600 uppercase tracking-wider">
-                    Perfect Days
-                  </th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-zinc-600 uppercase tracking-wider">
-                    Penalties
-                  </th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-zinc-600 uppercase tracking-wider">
-                    Net Position
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-zinc-200">
+
+          {/* Leaderboard */}
+          <div className="bg-white rounded-2xl overflow-hidden shadow-lg">
+            <div className="bg-gradient-to-r from-zinc-900 to-zinc-700 px-6 py-4">
+              <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                <span>🏆</span> Leaderboard
+              </h2>
+            </div>
+            <div className="p-4">
+              <div className="space-y-3">
                 {leaderboardWithPerfectDays.map((user, index) => (
-                  <tr
+                  <div
                     key={user.slug}
-                    className={index === 0 ? "bg-yellow-50" : ""}
+                    className={`flex items-center justify-between p-3 rounded-xl transition-all ${
+                      index === 0
+                        ? "bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-300"
+                        : "bg-zinc-50 hover:bg-zinc-100"
+                    }`}
                   >
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-2xl font-bold text-zinc-900">
-                        {index === 0 ? "🏆" : index + 1}
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl font-bold text-zinc-900 min-w-[2rem]">
+                        {index === 0 ? "👑" : `${index + 1}`}
                       </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <a
-                        href={`/checkin/${user.slug}`}
-                        className="text-lg font-medium text-zinc-900 hover:text-zinc-600"
-                      >
-                        {user.name}
-                      </a>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center">
-                      <div className="flex items-center justify-center gap-2">
-                        <span className="text-lg font-bold text-green-600">
-                          {user.perfectDays}
-                        </span>
+                      <div>
+                        <a
+                          href={`/checkin/${user.slug}`}
+                          className="font-bold text-zinc-900 hover:text-zinc-600 text-lg"
+                        >
+                          {user.name}
+                        </a>
                         {user.currentStreak > 0 && (
-                          <span className="text-sm text-orange-600 font-medium">
-                            🔥{user.currentStreak}
-                          </span>
+                          <div className="flex items-center gap-1 mt-1">
+                            <span className="text-orange-600 text-xl">🔥</span>
+                            <span className="text-sm font-bold text-orange-600">
+                              {user.currentStreak} day streak
+                            </span>
+                          </div>
                         )}
                       </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center">
-                      <span className="text-red-600 font-medium">
-                        ${user.totalPenalty}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center">
-                      <span
-                        className={`font-bold text-lg ${
-                          user.netPosition >= 0
-                            ? "text-green-600"
-                            : "text-red-600"
+                    </div>
+                    <div className="text-right">
+                      <div
+                        className={`text-xl font-bold ${
+                          user.netPosition >= 0 ? "text-green-600" : "text-red-600"
                         }`}
                       >
                         {user.netPosition >= 0 ? "+" : ""}$
-                        {user.netPosition.toFixed(2)}
-                      </span>
-                    </td>
-                  </tr>
+                        {user.netPosition.toFixed(0)}
+                      </div>
+                      <div className="text-xs text-zinc-500 mt-1">
+                        {user.perfectDays} perfect
+                      </div>
+                    </div>
+                  </div>
                 ))}
-              </tbody>
-            </table>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Quick Links */}
-        <div className="mt-8 text-center">
-          <p className="text-zinc-400 text-sm mb-4">Quick Links</p>
-          <div className="flex flex-wrap justify-center gap-3">
-            {users.map((user) => (
-              <a
-                key={user.slug}
-                href={`/checkin/${user.slug}`}
-                className="px-4 py-2 bg-zinc-800 text-white rounded-lg hover:bg-zinc-700 transition-colors text-sm"
-              >
-                {user.name}
-              </a>
-            ))}
-          </div>
+        {/* Stats Sections */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <PerfectDaysTracker users={perfectDaysData} />
+          <TaskSuccessRate taskStats={taskStats} />
         </div>
       </div>
     </div>

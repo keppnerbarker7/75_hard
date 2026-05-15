@@ -10,12 +10,12 @@ type TaskSuccessRateProps = {
 
 export default function TaskSuccessRate({ taskStats }: TaskSuccessRateProps) {
   return (
-    <div className="bg-white rounded-xl p-6 shadow-sm">
-      <h2 className="text-xl font-bold text-zinc-900 mb-4">
+    <div className="bg-white rounded-2xl p-6 shadow-lg">
+      <h2 className="text-xl font-bold text-zinc-900 mb-2">
         📊 Task Success Rates
       </h2>
-      <p className="text-sm text-zinc-600 mb-6">
-        Which tasks are the hardest for the group?
+      <p className="text-xs text-zinc-500 mb-4">
+        Which tasks are hardest?
       </p>
 
       <div className="space-y-4">
