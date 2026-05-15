@@ -243,8 +243,9 @@ export default function BulkDayEntry({ users, startDate }: BulkDayEntryProps) {
 
                 <div className="grid grid-cols-5 gap-2">
                   {[1, 2, 3, 4, 5].map((taskNum) => {
-                    const isChecked =
-                      userCheckIn[`task${taskNum}` as keyof CheckIn];
+                    const isChecked = Boolean(
+                      userCheckIn[`task${taskNum}` as keyof CheckIn]
+                    );
                     return (
                       <label
                         key={taskNum}
