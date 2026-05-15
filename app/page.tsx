@@ -133,27 +133,13 @@ export default async function Dashboard() {
                 <p className="mt-3 text-sm md:text-base text-[var(--muted)] max-w-xl">
                   Brutally simple scoreboard for a group challenge. Check in fast, miss tasks publicly, let the math stay honest.
                 </p>
-                <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-3">
-                  <div className="score-card rounded-2xl px-4 py-4">
-                    <p className="section-kicker text-[var(--muted)] mb-2">Challenge Day</p>
-                    <p className="metric-value text-4xl text-[var(--sand)]">{daysPassed + 1}</p>
-                    <p className="text-xs text-[var(--muted)] mt-1">of 75</p>
-                  </div>
-                  <div className="score-card rounded-2xl px-4 py-4">
-                    <p className="section-kicker text-[var(--muted)] mb-2">Pool Total</p>
-                    <p className="metric-value text-4xl text-[var(--accent)]">${poolTotal.toFixed(0)}</p>
-                    <p className="text-xs text-[var(--muted)] mt-1">live penalty pool</p>
-                  </div>
-                  <div className="score-card rounded-2xl px-4 py-4">
-                    <p className="section-kicker text-[var(--muted)] mb-2">Checked In</p>
-                    <p className="metric-value text-4xl text-[var(--olive)]">{checkedInCount}</p>
-                    <p className="text-xs text-[var(--muted)] mt-1">{pendingCount} still pending</p>
-                  </div>
-                  <div className="score-card rounded-2xl px-4 py-4">
-                    <p className="section-kicker text-[var(--muted)] mb-2">Days Left</p>
-                    <p className="metric-value text-4xl text-[var(--sand)]">{daysRemaining}</p>
-                    <p className="text-xs text-[var(--muted)] mt-1">{group.name}</p>
-                  </div>
+                <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm md:text-base text-[var(--muted)]">
+                  <span>
+                    <span className="text-[var(--sand)] font-semibold">Day {daysPassed + 1}</span> of 75
+                  </span>
+                  <span>{daysRemaining} days left</span>
+                  <span>{checkedInCount} checked in</span>
+                  <span className="text-[var(--accent)]">Pool ${poolTotal.toFixed(0)}</span>
                 </div>
               </div>
 
@@ -179,19 +165,18 @@ export default async function Dashboard() {
                   />
                 </div>
 
-                <div className="mt-5 grid grid-cols-2 gap-3">
-                  <div className="rounded-2xl bg-black/10 border border-white/15 px-4 py-4">
-                    <p className="section-kicker text-white/55 mb-2">Top Position</p>
+                <div className="mt-5 flex flex-wrap items-end gap-x-6 gap-y-3">
+                  <div>
+                    <p className="section-kicker text-white/55 mb-1">Best Position</p>
                     <p className="metric-value text-3xl text-white">
                       {leader ? `${leader.netPosition >= 0 ? "+" : ""}$${leader.netPosition.toFixed(0)}` : "--"}
                     </p>
                   </div>
-                  <div className="rounded-2xl bg-black/10 border border-white/15 px-4 py-4">
-                    <p className="section-kicker text-white/55 mb-2">Longest Fire</p>
+                  <div>
+                    <p className="section-kicker text-white/55 mb-1">Longest Streak</p>
                     <p className="metric-value text-3xl text-[#fff4d7]">
                       {Math.max(...leaderboardWithPerfectDays.map((user) => user.currentStreak), 0)}
                     </p>
-                    <p className="text-xs text-white/60 mt-1">day active streak</p>
                   </div>
                 </div>
               </div>
@@ -256,7 +241,6 @@ export default async function Dashboard() {
                       <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-[var(--muted)]">
                         <span>{user.perfectDays} perfect days</span>
                         <span>{user.currentStreak} day streak</span>
-                        <span>{user.daysRecorded} logged days</span>
                       </div>
                     </div>
                     <div className="text-right">
@@ -283,16 +267,12 @@ export default async function Dashboard() {
               <h2 className="font-display text-3xl uppercase text-[var(--sand)] mb-3">
                 Tonight&apos;s Check-Ins
               </h2>
-              <div className="grid grid-cols-2 gap-3 mb-4">
-                <div className="rounded-2xl bg-[rgba(180,208,127,0.09)] border border-[rgba(180,208,127,0.22)] px-4 py-4">
-                  <p className="section-kicker text-[var(--olive)] mb-2">Submitted</p>
-                  <p className="metric-value text-4xl text-[var(--olive)]">{checkedInCount}</p>
-                </div>
-                <div className="rounded-2xl bg-[rgba(255,90,54,0.09)] border border-[rgba(255,90,54,0.22)] px-4 py-4">
-                  <p className="section-kicker text-[var(--accent)] mb-2">Pending</p>
-                  <p className="metric-value text-4xl text-[var(--accent)]">{pendingCount}</p>
-                </div>
-              </div>
+              <p className="mb-4 text-sm text-[var(--muted)]">
+                <span className="text-[var(--olive)] font-semibold">{checkedInCount} submitted</span>
+                {" · "}
+                <span className="text-[var(--accent)] font-semibold">{pendingCount} pending</span>
+                {" · "}midnight Mountain Time closes the day
+              </p>
               <div className="flex flex-wrap gap-2">
                 {leaderboardWithPerfectDays.map((user) => (
                   <a

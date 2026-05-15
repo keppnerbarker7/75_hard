@@ -1,8 +1,12 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import CompletionChart from "./CompletionChart";
-import { calculateStreakData, calculateTaskStats } from "@/lib/challenge";
-import { formatDisplayDate } from "@/lib/dates";
+import {
+  buildLeaderboard,
+  calculateStreakData,
+  calculateTaskStats,
+} from "@/lib/challenge";
+import { formatDisplayDate, getTodayDateInMountainTime } from "@/lib/dates";
 
 export const dynamic = "force-dynamic";
 
@@ -42,6 +46,9 @@ export default async function UserStatsPage({
   const groupTaskStats = calculateTaskStats(allCheckIns);
   const streakData = calculateStreakData(user.checkIns);
   const totalPenalties = user.checkIns.reduce((sum, checkIn) => sum + checkIn.penalty, 0);
+  const leaderboard = buildLeaderboard(allUsers, user.group.startDate, getTodayDateInMountainTime());
+  const currentPosition =
+    leaderboard.find((entry) => entry.slug === user.slug)?.netPosition ?? 0;
 
   const chartData = user.checkIns.map((checkIn, index) => {
     const tasksCompleted = [
@@ -122,22 +129,22 @@ export default async function UserStatsPage({
               <p className="text-[var(--muted)] mt-3 max-w-2xl">
                 A cleaner read on where this challenge is breaking open for you, where you are holding the line, and what your recent entries actually say.
               </p>
-              <div className="mt-6 grid grid-cols-2 lg:grid-cols-4 gap-3">
-                <div className="score-card rounded-2xl px-4 py-4">
-                  <p className="section-kicker text-[var(--muted)] mb-2">Current Streak</p>
-                  <p className="metric-value text-4xl text-[var(--olive)]">{streakData.currentStreak}</p>
+              <div className="mt-6 flex flex-wrap items-end gap-x-6 gap-y-3">
+                <div>
+                  <p className="section-kicker text-[var(--muted)] mb-1">Net Position</p>
+                  <p
+                    className={`metric-value text-5xl ${
+                      currentPosition >= 0 ? "text-[var(--olive)]" : "text-[var(--accent)]"
+                    }`}
+                  >
+                    {currentPosition >= 0 ? "+" : ""}${currentPosition.toFixed(0)}
+                  </p>
                 </div>
-                <div className="score-card rounded-2xl px-4 py-4">
-                  <p className="section-kicker text-[var(--muted)] mb-2">Perfect Days</p>
-                  <p className="metric-value text-4xl text-[var(--sand)]">{streakData.perfectDays}</p>
-                </div>
-                <div className="score-card rounded-2xl px-4 py-4">
-                  <p className="section-kicker text-[var(--muted)] mb-2">Total Penalties</p>
-                  <p className="metric-value text-4xl text-[var(--accent)]">${totalPenalties}</p>
-                </div>
-                <div className="score-card rounded-2xl px-4 py-4">
-                  <p className="section-kicker text-[var(--muted)] mb-2">Entries Logged</p>
-                  <p className="metric-value text-4xl text-[var(--sand)]">{user.checkIns.length}</p>
+                <div className="text-sm md:text-base text-[var(--muted)] flex flex-wrap gap-x-5 gap-y-2">
+                  <span>{streakData.currentStreak} day streak</span>
+                  <span>{streakData.perfectDays} perfect days</span>
+                  <span>${totalPenalties} penalties</span>
+                  <span>{user.checkIns.length} entries logged</span>
                 </div>
               </div>
             </div>
@@ -182,45 +189,30 @@ export default async function UserStatsPage({
           </div>
 
           <div className="paper-panel rounded-[2rem] p-6">
-            <p className="section-kicker text-[var(--accent)] mb-2">Recent State</p>
+            <p className="section-kicker text-[var(--accent)] mb-2">Current Read</p>
             <h2 className="font-display text-3xl uppercase text-[var(--sand)] mb-3">
-              Last 5 Entries
+              Summary
             </h2>
-            <div className="space-y-3">
-              {recentCheckIns.map((checkIn) => (
-                <div
-                  key={checkIn.id}
-                  className={`rounded-[1.3rem] border p-4 ${
-                    checkIn.penalty === 0
-                      ? "border-[rgba(180,208,127,0.3)] bg-[rgba(180,208,127,0.07)]"
-                      : "border-[rgba(255,90,54,0.3)] bg-[rgba(255,90,54,0.07)]"
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <p className="font-semibold text-[var(--sand)]">
-                      {formatDisplayDate(checkIn.date, {
-                        weekday: "short",
-                        month: "short",
-                        day: "numeric",
-                      })}
-                    </p>
-                    <p className={`font-display text-2xl ${checkIn.penalty === 0 ? "text-[var(--olive)]" : "text-[var(--accent)]"}`}>
-                      ${checkIn.penalty}
-                    </p>
-                  </div>
-                  <p className="text-sm text-[var(--muted)] mt-2">
-                    {[
-                      checkIn.task1,
-                      checkIn.task2,
-                      checkIn.task3,
-                      checkIn.task4,
-                      checkIn.task5,
-                    ].filter(Boolean).length}
-                    /5 tasks completed
-                    {checkIn.isAutoFilled ? " · auto-filled" : ""}
-                  </p>
-                </div>
-              ))}
+            <div className="space-y-3 text-sm md:text-base text-[var(--muted)]">
+              <p>
+                {strongestTask
+                  ? `${strongestTask.emoji} ${strongestTask.taskName} is your strongest habit at ${Math.round(
+                      strongestTask.completionRate * 100
+                    )}%.`
+                  : "No task pattern yet."}
+              </p>
+              <p>
+                {weakestTask
+                  ? `${weakestTask.emoji} ${weakestTask.taskName} is costing you the most at ${Math.round(
+                      weakestTask.completionRate * 100
+                    )}%.`
+                  : "No weak spot identified yet."}
+              </p>
+              <p>
+                {bestDay
+                  ? `${bestDay[0]} has been your cleanest day.`
+                  : "Not enough entries yet to spot a best day."}
+              </p>
             </div>
           </div>
         </div>
