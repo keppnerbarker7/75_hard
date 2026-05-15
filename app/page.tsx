@@ -1,17 +1,20 @@
 import { prisma } from "@/lib/prisma";
-import { calculateStreakData } from "./components/PerfectDaysTracker";
-import TaskSuccessRate, {
-  calculateTaskStats,
-} from "./components/TaskSuccessRate";
+import TaskSuccessRate from "./components/TaskSuccessRate";
 import GroupSmallMultiples from "./components/GroupSmallMultiples";
+import {
+  buildLeaderboard,
+  calculateStreakData,
+  calculateTaskStats,
+  getDaysPassedSinceStart,
+  getPoolTotal,
+} from "@/lib/challenge";
+import { getTodayDateInMountainTime } from "@/lib/dates";
 
 export const dynamic = "force-dynamic";
 
 export default async function Dashboard() {
   // Get today's date in MT timezone
-  const today = new Date().toLocaleDateString("en-CA", {
-    timeZone: "America/Denver",
-  });
+  const today = getTodayDateInMountainTime();
 
   let users;
 
@@ -67,33 +70,8 @@ export default async function Dashboard() {
 
   const group = users[0].group;
   const groupSize = users.length;
-
-  // Calculate how many days have passed since start (using MT timezone)
-  const startDateStr = new Date(group.startDate).toLocaleDateString("en-CA", {
-    timeZone: "America/Denver",
-  });
-  const todayStr = new Date().toLocaleDateString("en-CA", {
-    timeZone: "America/Denver",
-  });
-
-  const startDate = new Date(startDateStr);
-  const todayDateForCalc = new Date(todayStr);
-  // Days passed EXCLUDING today (only count complete days)
-  const daysPassed = Math.floor(
-    (todayDateForCalc.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
-  );
-
-  // Calculate total pool including penalties for unrecorded days
-  const recordedPenalties = users.reduce((sum, user) => {
-    return sum + user.checkIns.reduce((s, c) => s + c.penalty, 0);
-  }, 0);
-
-  const totalRecordedDays = users.reduce((sum, user) => sum + user.checkIns.length, 0);
-  const expectedTotalDays = daysPassed * groupSize;
-  const missingDays = expectedTotalDays - totalRecordedDays;
-  const unrecordedPenalties = missingDays * 10;
-
-  const poolTotal = recordedPenalties + unrecordedPenalties;
+  const daysPassed = getDaysPassedSinceStart(group.startDate, today);
+  const poolTotal = getPoolTotal(users, daysPassed);
 
   // Calculate days remaining
   const endDate = new Date(group.endDate);
@@ -103,39 +81,7 @@ export default async function Dashboard() {
   );
 
   // Build leaderboard data with expected penalties for missing days
-  const leaderboardData = users.map((user) => {
-    const userCheckIns = user.checkIns;
-
-    // Sum actual recorded penalties
-    const recordedPenalty = userCheckIns.reduce(
-      (sum, checkIn) => sum + checkIn.penalty,
-      0
-    );
-
-    // Calculate missing days and add $10 for each
-    const daysRecorded = userCheckIns.length;
-    const missingDays = Math.max(0, daysPassed - daysRecorded);
-    const missingPenalty = missingDays * 10;
-
-    const totalPenalty = recordedPenalty + missingPenalty;
-    const share = poolTotal / groupSize;
-    const netPosition = share - totalPenalty; // positive = gain, negative = owe
-
-    // Check if they've checked in today (exclude auto-filled)
-    const checkedInToday = userCheckIns.some(
-      (checkIn) => checkIn.date === today && !checkIn.isAutoFilled
-    );
-
-    return {
-      name: user.name,
-      slug: user.slug,
-      daysCompleted: daysRecorded,
-      totalPenalty,
-      netPosition,
-      checkedInToday,
-      missingDays,
-    };
-  });
+  const leaderboardData = buildLeaderboard(users, group.startDate, today);
 
   // Calculate perfect days and streaks for each user
   const perfectDaysData = users.map((user) => {
@@ -168,10 +114,7 @@ export default async function Dashboard() {
   );
   const taskStats = calculateTaskStats(realCheckIns);
 
-  // Calculate group average completion rate (0-1)
-  const groupAvgCompletionRate = taskStats.length > 0
-    ? taskStats.reduce((sum, t) => sum + t.completionRate, 0) / taskStats.length
-    : 0.8; // Default to 80% if no data
+  const checkedInCount = leaderboardWithPerfectDays.filter((user) => user.checkedInToday).length;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 py-6 md:py-12 px-4">
@@ -182,9 +125,19 @@ export default async function Dashboard() {
             75 Hard Challenge
           </h1>
           <p className="text-zinc-400 text-sm md:text-base">{group.name}</p>
-          <div className="mt-4 inline-flex items-baseline bg-white/10 backdrop-blur-sm px-6 py-3 rounded-full">
-            <span className="text-zinc-300 text-sm font-medium">Days Remaining: </span>
-            <span className="text-white text-2xl font-bold ml-2">{daysRemaining}</span>
+          <div className="mt-4 flex flex-col sm:flex-row gap-3 items-center justify-center">
+            <div className="inline-flex items-baseline bg-white/10 backdrop-blur-sm px-6 py-3 rounded-full">
+              <span className="text-zinc-300 text-sm font-medium">Day: </span>
+              <span className="text-white text-2xl font-bold ml-2">{daysPassed + 1} of 75</span>
+            </div>
+            <div className="inline-flex items-baseline bg-white/10 backdrop-blur-sm px-6 py-3 rounded-full">
+              <span className="text-zinc-300 text-sm font-medium">Pool Total: </span>
+              <span className="text-white text-2xl font-bold ml-2">${poolTotal.toFixed(2)}</span>
+            </div>
+            <div className="inline-flex items-baseline bg-white/10 backdrop-blur-sm px-6 py-3 rounded-full">
+              <span className="text-zinc-300 text-sm font-medium">Days Remaining: </span>
+              <span className="text-white text-2xl font-bold ml-2">{daysRemaining}</span>
+            </div>
           </div>
         </div>
 
@@ -193,9 +146,14 @@ export default async function Dashboard() {
 
           {/* Today's Check-Ins */}
           <div className="bg-white rounded-2xl p-4 md:p-6 shadow-lg">
-            <h2 className="text-lg md:text-xl font-bold text-zinc-900 mb-3 md:mb-4 flex items-center gap-2">
-              <span>📋</span> Today's Check-Ins
-            </h2>
+            <div className="flex flex-col gap-1 mb-3 md:mb-4">
+              <h2 className="text-lg md:text-xl font-bold text-zinc-900 flex items-center gap-2">
+                <span>📋</span> Today's Check-Ins
+              </h2>
+              <p className="text-sm text-zinc-500">
+                {checkedInCount} of {groupSize} submitted today
+              </p>
+            </div>
             <div className="flex flex-wrap gap-2">
               {leaderboardWithPerfectDays.map((user) => (
                 <a

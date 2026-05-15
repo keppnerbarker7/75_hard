@@ -1,23 +1,30 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import CheckInForm from "./CheckInForm";
-
-const TASKS = [
-  { id: 1, label: "Read at least 5 pages (physical book)" },
-  { id: 2, label: "Outdoor workout — 45 min" },
-  { id: 3, label: "Second workout — 45 min" },
-  { id: 4, label: "Drink 1 gallon of water" },
-  { id: 5, label: "Follow your chosen diet" },
-];
+import {
+  TASKS,
+  buildLeaderboard,
+  calculateTaskStats,
+  getDaysPassedSinceStart,
+  getPoolTotal,
+} from "@/lib/challenge";
+import {
+  formatDisplayDate,
+  getCorrectionDeadlineLabel,
+  getTodayDateInMountainTime,
+  isCorrectionWindowOpen,
+} from "@/lib/dates";
 
 export default async function CheckInPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ date?: string; mode?: string }>;
 }) {
   const { slug } = await params;
+  const resolvedSearchParams = await searchParams;
 
-  // Find the user
   const user = await prisma.user.findUnique({
     where: { slug },
     include: { group: true },
@@ -27,132 +34,109 @@ export default async function CheckInPage({
     notFound();
   }
 
-  // Get today's date in YYYY-MM-DD format (MT timezone)
-  const today = new Date().toLocaleDateString("en-CA", {
-    timeZone: "America/Denver",
-  });
+  const today = getTodayDateInMountainTime();
+  const requestedDate =
+    resolvedSearchParams.date && /^\d{4}-\d{2}-\d{2}$/.test(resolvedSearchParams.date)
+      ? resolvedSearchParams.date
+      : today;
+  const mode = resolvedSearchParams.mode === "correct" ? "correct" : "today";
+  const targetDate = mode === "correct" ? requestedDate : today;
 
-  // Check if user has already checked in today
   const existingCheckIn = await prisma.checkIn.findUnique({
     where: {
       userId_date: {
         userId: user.id,
-        date: today,
+        date: targetDate,
       },
     },
   });
 
-  // Calculate total penalties to date
   const allCheckIns = await prisma.checkIn.findMany({
     where: { userId: user.id },
   });
 
-  const totalPenalty = allCheckIns.reduce(
-    (sum, checkIn) => sum + checkIn.penalty,
-    0
-  );
+  const totalPenalty = allCheckIns.reduce((sum, checkIn) => sum + checkIn.penalty, 0);
 
-  // Calculate pool and position info
   const allUsers = await prisma.user.findMany({
     include: { checkIns: true },
   });
 
+  const leaderboard = buildLeaderboard(allUsers, user.group.startDate, today);
+  const daysPassed = getDaysPassedSinceStart(user.group.startDate, today);
+  const poolTotal = getPoolTotal(allUsers, daysPassed);
   const groupSize = allUsers.length;
+  const currentPosition =
+    leaderboard.find((entry) => entry.slug === user.slug)?.netPosition ?? 0;
 
-  // Calculate how many days have passed since start (using MT timezone)
-  const startDateStr = new Date(user.group.startDate).toLocaleDateString("en-CA", {
-    timeZone: "America/Denver",
-  });
-  const todayStr = new Date().toLocaleDateString("en-CA", {
-    timeZone: "America/Denver",
-  });
-
-  const startDate = new Date(startDateStr);
-  const todayDate = new Date(todayStr);
-
-  // Days passed EXCLUDING today (only count complete days)
-  // Today isn't over yet, so don't penalize for it
-  const daysPassed = Math.floor(
-    (todayDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
+  const realCheckIns = allUsers.flatMap((groupUser) =>
+    groupUser.checkIns.filter((checkIn) => !checkIn.isAutoFilled)
   );
+  const taskStats = calculateTaskStats(realCheckIns);
+  const groupAvgCompletionRate =
+    taskStats.length > 0
+      ? taskStats.reduce((sum, task) => sum + task.completionRate, 0) / taskStats.length
+      : 0.8;
 
-  // Calculate user's missing days (for current position on leaderboard)
-  const userDaysRecorded = allCheckIns.length;
-  const userMissingDays = Math.max(0, daysPassed - userDaysRecorded);
-  const userMissingPenalty = userMissingDays * 10;
-
-  // Calculate total pool including penalties for unrecorded days
-  const recordedPenalties = allUsers.reduce((sum, u) => {
-    return sum + u.checkIns.reduce((s, c) => s + c.penalty, 0);
-  }, 0);
-
-  const totalRecordedDays = allUsers.reduce((sum, u) => sum + u.checkIns.length, 0);
-  const expectedTotalDays = daysPassed * groupSize;
-  const missingDays = expectedTotalDays - totalRecordedDays;
-  const unrecordedPenalties = missingDays * 10;
-
-  const poolTotal = recordedPenalties + unrecordedPenalties;
-
-  // Calculate user's current position (what's on the dashboard right now)
-  // poolTotal now correctly excludes today since we removed the +1 from daysPassed
-  const currentShare = poolTotal / groupSize;
-  const currentPosition = currentShare - totalPenalty;
-
-  // Calculate group average completion rate (same as Task Success Rates on dashboard)
-  const realCheckIns = allUsers.flatMap(u => u.checkIns.filter(c => !c.isAutoFilled));
-
-  let groupAvgCompletionRate = 0.8; // Default to 80%
-  if (realCheckIns.length > 0) {
-    // Calculate average across all 5 tasks
-    const taskCompletions = [1, 2, 3, 4, 5].map(taskNum => {
-      const taskKey = `task${taskNum}` as 'task1' | 'task2' | 'task3' | 'task4' | 'task5';
-      const completed = realCheckIns.filter(c => c[taskKey]).length;
-      return completed / realCheckIns.length;
-    });
-    groupAvgCompletionRate = taskCompletions.reduce((sum, rate) => sum + rate, 0) / 5;
-  }
-
-  // Convert completion rate to average penalty
-  // If they complete 80% of tasks, they miss 20% = 1 task = $2
   const avgTasksMissed = (1 - groupAvgCompletionRate) * 5;
   const groupAvgPenalty = Math.min(avgTasksMissed * 2, 10);
-
-  // Count how many people haven't checked in today (excluding current user)
-  const peopleNotCheckedInToday = allUsers.filter(u =>
-    u.id !== user.id && !u.checkIns.some(c => c.date === today && !c.isAutoFilled)
-  ).length;
+  const canCorrect =
+    mode === "correct" &&
+    Boolean(existingCheckIn?.isAutoFilled) &&
+    isCorrectionWindowOpen(targetDate);
+  const displayDate = formatDisplayDate(targetDate, {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 flex items-center justify-center p-4">
       <div className="w-full max-w-2xl">
         <div className="bg-white rounded-2xl shadow-2xl p-8">
-          {/* Header */}
           <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-zinc-900 mb-2">
-              {user.name}
-            </h1>
-            <p className="text-zinc-600 text-lg">
-              {new Date(today).toLocaleDateString("en-US", {
-                weekday: "long",
-                month: "long",
-                day: "numeric",
-                year: "numeric",
-              })}
-            </p>
+            <h1 className="text-4xl font-bold text-zinc-900 mb-2">{user.name}</h1>
+            <p className="text-zinc-600 text-lg">{displayDate}</p>
+            {mode === "correct" && (
+              <p className="text-sm text-orange-700 mt-2 font-semibold">
+                Correcting an auto-filled entry. Window closes at midnight after{" "}
+                {getCorrectionDeadlineLabel(targetDate)}.
+              </p>
+            )}
             <p className="text-sm text-zinc-500 mt-2">
-              Current Position: <span className={`font-bold ${currentPosition >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {currentPosition >= 0 ? '+' : ''}${currentPosition.toFixed(2)}
+              Current Position:{" "}
+              <span
+                className={`font-bold ${
+                  currentPosition >= 0 ? "text-green-600" : "text-red-600"
+                }`}
+              >
+                {currentPosition >= 0 ? "+" : ""}${currentPosition.toFixed(2)}
               </span>
             </p>
           </div>
 
-          {existingCheckIn ? (
-            /* Already Submitted State */
-            <div className="bg-green-50 border-2 border-green-200 rounded-xl p-6">
+          {existingCheckIn && !canCorrect ? (
+            <div
+              className={`border-2 rounded-xl p-6 ${
+                mode === "correct" && existingCheckIn.isAutoFilled
+                  ? "bg-orange-50 border-orange-200"
+                  : "bg-green-50 border-green-200"
+              }`}
+            >
               <div className="text-center mb-6">
-                <div className="inline-block p-3 bg-green-100 rounded-full mb-4">
+                <div
+                  className={`inline-block p-3 rounded-full mb-4 ${
+                    mode === "correct" && existingCheckIn.isAutoFilled
+                      ? "bg-orange-100"
+                      : "bg-green-100"
+                  }`}
+                >
                   <svg
-                    className="w-12 h-12 text-green-600"
+                    className={`w-12 h-12 ${
+                      mode === "correct" && existingCheckIn.isAutoFilled
+                        ? "text-orange-600"
+                        : "text-green-600"
+                    }`}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -165,30 +149,41 @@ export default async function CheckInPage({
                     />
                   </svg>
                 </div>
-                <h2 className="text-2xl font-bold text-green-900 mb-2">
-                  Already Checked In
+                <h2
+                  className={`text-2xl font-bold mb-2 ${
+                    mode === "correct" && existingCheckIn.isAutoFilled
+                      ? "text-orange-900"
+                      : "text-green-900"
+                  }`}
+                >
+                  {mode === "correct" && existingCheckIn.isAutoFilled
+                    ? "Correction Window Closed"
+                    : "Already Checked In"}
                 </h2>
-                <p className="text-green-700">
-                  You completed your check-in today at{" "}
-                  {new Date(existingCheckIn.submittedAt).toLocaleTimeString(
-                    "en-US",
-                    {
-                      hour: "numeric",
-                      minute: "2-digit",
-                      timeZone: "America/Denver",
-                    }
-                  )}{" "}
-                  MT
+                <p
+                  className={
+                    mode === "correct" && existingCheckIn.isAutoFilled
+                      ? "text-orange-700"
+                      : "text-green-700"
+                  }
+                >
+                  {mode === "correct" && existingCheckIn.isAutoFilled
+                    ? "This entry can no longer be corrected."
+                    : `You completed this check-in at ${new Date(
+                        existingCheckIn.submittedAt
+                      ).toLocaleTimeString("en-US", {
+                        hour: "numeric",
+                        minute: "2-digit",
+                        timeZone: "America/Denver",
+                      })} MT`}
                 </p>
               </div>
 
-              {/* Show what was completed */}
               <div className="space-y-3">
                 {TASKS.map((task) => {
-                  const completed =
-                    existingCheckIn[
-                      `task${task.id}` as keyof typeof existingCheckIn
-                    ];
+                  const completed = Boolean(
+                    existingCheckIn[`task${task.id}` as keyof typeof existingCheckIn]
+                  );
                   return (
                     <div
                       key={task.id}
@@ -239,19 +234,36 @@ export default async function CheckInPage({
                 })}
               </div>
 
-              <div className="mt-6 pt-6 border-t border-green-200 text-center">
-                <p className="text-lg font-bold text-green-900">
-                  Today's Penalty: ${existingCheckIn.penalty}
+              <div
+                className={`mt-6 pt-6 border-t text-center ${
+                  mode === "correct" && existingCheckIn.isAutoFilled
+                    ? "border-orange-200"
+                    : "border-green-200"
+                }`}
+              >
+                <p
+                  className={`text-lg font-bold ${
+                    mode === "correct" && existingCheckIn.isAutoFilled
+                      ? "text-orange-900"
+                      : "text-green-900"
+                  }`}
+                >
+                  {mode === "correct" ? "Entry Penalty" : "Today's Penalty"}: $
+                  {existingCheckIn.penalty}
                 </p>
-                <p className="text-sm text-green-700 mt-1">
+                <p
+                  className={`text-sm mt-1 ${
+                    mode === "correct" && existingCheckIn.isAutoFilled
+                      ? "text-orange-700"
+                      : "text-green-700"
+                  }`}
+                >
                   Running Total: ${totalPenalty}
                 </p>
               </div>
             </div>
           ) : (
-            /* Check-in Form */
             <CheckInForm
-              userId={user.id}
               slug={slug}
               tasks={TASKS}
               totalPenalty={totalPenalty}
@@ -260,10 +272,12 @@ export default async function CheckInPage({
               groupSize={groupSize}
               groupAvgCompletionRate={groupAvgCompletionRate}
               groupAvgPenalty={groupAvgPenalty}
+              targetDate={targetDate}
+              mode={mode}
+              existingPenalty={existingCheckIn?.penalty ?? 0}
             />
           )}
 
-          {/* Footer Link */}
           <div className="mt-8 text-center">
             <a
               href="/"

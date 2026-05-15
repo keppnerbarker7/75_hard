@@ -1,8 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
-import { calculateStreakData } from "@/app/components/PerfectDaysTracker";
-import { calculateTaskStats } from "@/app/components/TaskSuccessRate";
 import CompletionChart from "./CompletionChart";
+import { calculateStreakData, calculateTaskStats } from "@/lib/challenge";
+import { formatDisplayDate } from "@/lib/dates";
 
 export const dynamic = "force-dynamic";
 
@@ -36,10 +36,14 @@ export default async function UserStatsPage({
   });
 
   // Calculate user's task completion rates
-  const userTaskStats = calculateTaskStats(user.checkIns);
+  const userTaskStats = calculateTaskStats(
+    user.checkIns.filter((checkIn) => !checkIn.isAutoFilled)
+  );
 
   // Calculate group average task completion
-  const allCheckIns = allUsers.flatMap((u) => u.checkIns);
+  const allCheckIns = allUsers.flatMap((u) =>
+    u.checkIns.filter((checkIn) => !checkIn.isAutoFilled)
+  );
   const groupTaskStats = calculateTaskStats(allCheckIns);
 
   // Calculate streak data
@@ -83,8 +87,7 @@ export default async function UserStatsPage({
   };
 
   user.checkIns.forEach((checkIn) => {
-    const date = new Date(checkIn.date);
-    const dayName = date.toLocaleDateString("en-US", { weekday: "long" });
+    const dayName = formatDisplayDate(checkIn.date, { weekday: "long" });
 
     // Count completed tasks
     const tasksCompleted = [
@@ -295,51 +298,67 @@ export default async function UserStatsPage({
           {/* Recent Performance */}
           <div className="bg-white rounded-2xl p-6 shadow-lg lg:col-span-2">
             <h2 className="text-xl font-bold text-zinc-900 mb-4">
-              Recent Check-Ins (Last 10 Days)
+              Recent Check-Ins (Last 5 Days)
             </h2>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+            <div className="space-y-4">
               {user.checkIns
-                .slice(-10)
+                .slice(-5)
                 .reverse()
                 .map((checkIn) => {
-                  const date = new Date(checkIn.date);
-                  const completedTasks = [
-                    checkIn.task1,
-                    checkIn.task2,
-                    checkIn.task3,
-                    checkIn.task4,
-                    checkIn.task5,
-                  ].filter(Boolean).length;
+                  const taskNames = [
+                    { name: "📖 Read 5 pages", completed: checkIn.task1 },
+                    { name: "🏃 Outdoor workout", completed: checkIn.task2 },
+                    { name: "💪 Second workout", completed: checkIn.task3 },
+                    { name: "💧 1 gallon water", completed: checkIn.task4 },
+                    { name: "🥗 Follow diet", completed: checkIn.task5 },
+                  ];
 
                   return (
                     <div
                       key={checkIn.id}
-                      className={`p-3 rounded-lg border-2 ${
+                      className={`p-4 rounded-xl border-2 ${
                         checkIn.penalty === 0
                           ? "border-green-300 bg-green-50"
                           : "border-red-300 bg-red-50"
                       }`}
                     >
-                      <p className="text-xs text-zinc-600 mb-1">
-                        {date.toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                        })}
-                      </p>
-                      <p className="text-2xl font-bold text-zinc-900 mb-1">
-                        {completedTasks}/5
-                      </p>
-                      <p
-                        className={`text-sm font-bold ${
-                          checkIn.penalty === 0
-                            ? "text-green-600"
-                            : "text-red-600"
-                        }`}
-                      >
-                        ${checkIn.penalty}
-                      </p>
+                      <div className="flex items-center justify-between mb-3">
+                        <p className="font-bold text-zinc-900">
+                          {formatDisplayDate(checkIn.date, {
+                            weekday: "short",
+                            month: "short",
+                            day: "numeric",
+                          })}
+                        </p>
+                        <p
+                          className={`text-lg font-bold ${
+                            checkIn.penalty === 0
+                              ? "text-green-600"
+                              : "text-red-600"
+                          }`}
+                        >
+                          ${checkIn.penalty}
+                        </p>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {taskNames.map((task, i) => (
+                          <div
+                            key={i}
+                            className={`flex items-center gap-2 text-sm ${
+                              task.completed
+                                ? "text-green-700"
+                                : "text-red-700"
+                            }`}
+                          >
+                            <span className="text-base">
+                              {task.completed ? "✓" : "✗"}
+                            </span>
+                            <span>{task.name}</span>
+                          </div>
+                        ))}
+                      </div>
                       {checkIn.isAutoFilled && (
-                        <p className="text-xs text-orange-600 mt-1">
+                        <p className="text-xs text-orange-600 mt-2 italic">
                           Auto-filled
                         </p>
                       )}

@@ -1,29 +1,110 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { calculatePenalty } from "@/lib/challenge";
+import { getTodayDateInMountainTime, isCorrectionWindowOpen } from "@/lib/dates";
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { userId, tasks } = body;
+    const body = (await request.json()) as {
+      slug?: string;
+      tasks?: Record<number, boolean>;
+      date?: string;
+      mode?: "today" | "correct";
+    };
+    const { slug, tasks, date, mode } = body;
 
-    // Validate input
-    if (!userId || !tasks) {
+    if (!slug || !tasks) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
       );
     }
 
-    // Get today's date in MT timezone (YYYY-MM-DD format)
-    const today = new Date().toLocaleDateString("en-CA", {
-      timeZone: "America/Denver",
+    const user = await prisma.user.findUnique({
+      where: { slug },
     });
 
-    // Check if user already checked in today
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    const today = getTodayDateInMountainTime();
+    const targetDate = date ?? today;
+    const penalty = calculatePenalty(tasks);
+
+    if (mode === "correct") {
+      if (!date) {
+        return NextResponse.json(
+          { error: "Correction date is required" },
+          { status: 400 }
+        );
+      }
+
+      if (!isCorrectionWindowOpen(targetDate)) {
+        return NextResponse.json(
+          { error: "Correction window has closed" },
+          { status: 403 }
+        );
+      }
+
+      const existingCheckIn = await prisma.checkIn.findUnique({
+        where: {
+          userId_date: {
+            userId: user.id,
+            date: targetDate,
+          },
+        },
+      });
+
+      if (!existingCheckIn || !existingCheckIn.isAutoFilled) {
+        return NextResponse.json(
+          { error: "No auto-filled entry is available for correction" },
+          { status: 409 }
+        );
+      }
+
+      const checkIn = await prisma.checkIn.update({
+        where: {
+          userId_date: {
+            userId: user.id,
+            date: targetDate,
+          },
+        },
+        data: {
+          task1: tasks[1] || false,
+          task2: tasks[2] || false,
+          task3: tasks[3] || false,
+          task4: tasks[4] || false,
+          task5: tasks[5] || false,
+          penalty,
+          isAutoFilled: false,
+          correctedAt: new Date(),
+        },
+      });
+
+      return NextResponse.json({
+        success: true,
+        checkIn: {
+          id: checkIn.id,
+          penalty: checkIn.penalty,
+          submittedAt: checkIn.submittedAt,
+          correctedAt: checkIn.correctedAt,
+          date: checkIn.date,
+        },
+      });
+    }
+
+    if (targetDate !== today) {
+      return NextResponse.json(
+        { error: "Backdating is only allowed through the correction flow" },
+        { status: 400 }
+      );
+    }
+
     const existingCheckIn = await prisma.checkIn.findUnique({
       where: {
         userId_date: {
-          userId,
+          userId: user.id,
           date: today,
         },
       },
@@ -36,17 +117,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Calculate penalty: $2 per missed task, capped at $10
-    const completedTasks = Object.values(tasks as Record<number, boolean>).filter(
-      Boolean
-    ).length;
-    const missedTasks = 5 - completedTasks;
-    const penalty = Math.min(missedTasks * 2, 10);
-
-    // Create check-in
     const checkIn = await prisma.checkIn.create({
       data: {
-        userId,
+        userId: user.id,
         date: today,
         task1: tasks[1] || false,
         task2: tasks[2] || false,

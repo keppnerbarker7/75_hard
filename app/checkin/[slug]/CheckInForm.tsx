@@ -9,7 +9,6 @@ type Task = {
 };
 
 type CheckInFormProps = {
-  userId: string;
   slug: string;
   tasks: Task[];
   totalPenalty: number;
@@ -18,10 +17,12 @@ type CheckInFormProps = {
   groupSize: number;
   groupAvgCompletionRate: number;
   groupAvgPenalty: number;
+  targetDate: string;
+  mode: "today" | "correct";
+  existingPenalty: number;
 };
 
 export default function CheckInForm({
-  userId,
   slug,
   tasks,
   totalPenalty,
@@ -30,6 +31,9 @@ export default function CheckInForm({
   groupSize,
   groupAvgCompletionRate,
   groupAvgPenalty,
+  targetDate,
+  mode,
+  existingPenalty,
 }: CheckInFormProps) {
   const router = useRouter();
   const [checkedTasks, setCheckedTasks] = useState<Record<number, boolean>>({
@@ -61,7 +65,9 @@ export default function CheckInForm({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          userId,
+          slug,
+          date: targetDate,
+          mode,
           tasks: checkedTasks,
         }),
       });
@@ -71,7 +77,6 @@ export default function CheckInForm({
         throw new Error(data.error || "Failed to submit check-in");
       }
 
-      // Refresh the page to show the submitted state
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
@@ -82,19 +87,20 @@ export default function CheckInForm({
   const completedCount = Object.values(checkedTasks).filter(Boolean).length;
   const missedCount = 5 - completedCount;
   const estimatedPenalty = Math.min(missedCount * 2, 10);
-
-  // Calculate estimated new position
-  // poolTotal doesn't include today's data yet
-  // Add your penalty + everyone else's expected penalty (group average)
   const othersExpectedPenalties = (groupSize - 1) * groupAvgPenalty;
-  const newPoolTotal = poolTotal + estimatedPenalty + othersExpectedPenalties;
+  const newPoolTotal =
+    mode === "correct"
+      ? poolTotal - existingPenalty + estimatedPenalty
+      : poolTotal + estimatedPenalty + othersExpectedPenalties;
   const newShare = newPoolTotal / groupSize;
-  const newTotalPenalty = totalPenalty + estimatedPenalty;
+  const newTotalPenalty =
+    mode === "correct"
+      ? totalPenalty - existingPenalty + estimatedPenalty
+      : totalPenalty + estimatedPenalty;
   const estimatedNewPosition = newShare - newTotalPenalty;
 
   return (
     <form onSubmit={handleSubmit}>
-      {/* Tasks */}
       <div className="space-y-4 mb-8">
         {tasks.map((task) => (
           <label
@@ -148,14 +154,15 @@ export default function CheckInForm({
         ))}
       </div>
 
-      {/* Penalty Preview */}
       <div className="bg-zinc-100 rounded-lg p-4 mb-6">
         <div className="flex justify-between items-center text-sm text-zinc-600 mb-1">
           <span>Completed: {completedCount}/5</span>
           <span>Missed: {missedCount}</span>
         </div>
         <div className="flex justify-between items-center font-bold text-lg">
-          <span className="text-zinc-900">Today's Penalty:</span>
+          <span className="text-zinc-900">
+            {mode === "correct" ? "Corrected Penalty:" : "Today's Penalty:"}
+          </span>
           <span
             className={estimatedPenalty === 0 ? "text-green-600" : "text-red-600"}
           >
@@ -164,39 +171,56 @@ export default function CheckInForm({
         </div>
         <div className="flex justify-between items-center text-sm mt-2 pt-2 border-t border-zinc-300">
           <span className="text-zinc-600">Current Position:</span>
-          <span className={`font-bold ${currentPosition >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-            {currentPosition >= 0 ? '+' : ''}${currentPosition.toFixed(2)}
+          <span
+            className={`font-bold ${
+              currentPosition >= 0 ? "text-green-600" : "text-red-600"
+            }`}
+          >
+            {currentPosition >= 0 ? "+" : ""}${currentPosition.toFixed(2)}
           </span>
         </div>
         <div className="flex justify-between items-center text-sm mt-1">
           <span className="text-zinc-600">Est. New Position:</span>
-          <span className={`font-bold ${estimatedNewPosition >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-            {estimatedNewPosition >= 0 ? '+' : ''}${estimatedNewPosition.toFixed(2)}
+          <span
+            className={`font-bold ${
+              estimatedNewPosition >= 0 ? "text-green-600" : "text-red-600"
+            }`}
+          >
+            {estimatedNewPosition >= 0 ? "+" : ""}$
+            {estimatedNewPosition.toFixed(2)}
           </span>
         </div>
         <div className="text-xs text-zinc-500 mt-2 italic">
-          * Estimate only shows your impact. Group avg: {Math.round(groupAvgCompletionRate * 100)}% completion (${groupAvgPenalty.toFixed(2)} penalty)
+          * Estimate only shows your impact. Group avg:{" "}
+          {Math.round(groupAvgCompletionRate * 100)}% completion ($
+          {groupAvgPenalty.toFixed(2)} penalty)
         </div>
       </div>
 
-      {/* Error Message */}
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">
           {error}
         </div>
       )}
 
-      {/* Submit Button */}
       <button
         type="submit"
         disabled={isSubmitting}
         className={`w-full py-4 px-6 rounded-xl font-bold text-lg transition-all ${
           isSubmitting
             ? "bg-zinc-300 text-zinc-500 cursor-not-allowed"
+            : mode === "correct"
+            ? "bg-orange-600 text-white hover:bg-orange-700 active:scale-[0.98]"
             : "bg-zinc-900 text-white hover:bg-zinc-800 active:scale-[0.98]"
         }`}
       >
-        {isSubmitting ? "Submitting..." : "Submit Check-In"}
+        {isSubmitting
+          ? mode === "correct"
+            ? "Updating..."
+            : "Submitting..."
+          : mode === "correct"
+          ? "Save Correction"
+          : "Submit Check-In"}
       </button>
     </form>
   );

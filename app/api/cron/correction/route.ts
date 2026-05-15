@@ -1,23 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendEmail, getCorrectionEmailHtml } from "@/lib/email";
+import { getCorrectionLink } from "@/lib/challenge";
+import { getYesterdayDateInMountainTime } from "@/lib/dates";
 
 export async function GET(request: NextRequest) {
-  // Verify this is from Vercel Cron
   const authHeader = request.headers.get("authorization");
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
-    // Get yesterday's date in MT timezone
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    const yesterdayStr = yesterday.toLocaleDateString("en-CA", {
-      timeZone: "America/Denver",
-    });
+    const yesterdayStr = getYesterdayDateInMountainTime();
 
-    // Find all auto-filled check-ins from yesterday that haven't been corrected
     const autoFilledCheckIns = await prisma.checkIn.findMany({
       where: {
         date: yesterdayStr,
@@ -38,10 +33,13 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Send correction email to each user
     const results = await Promise.all(
       autoFilledCheckIns.map(async (checkIn) => {
-        const checkInUrl = `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/checkin/${checkIn.user.slug}`;
+        const checkInUrl = getCorrectionLink(
+          checkIn.user.slug,
+          yesterdayStr,
+          process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
+        );
 
         const html = getCorrectionEmailHtml(
           checkIn.user.name,
