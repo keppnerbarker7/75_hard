@@ -161,6 +161,87 @@ export function getCorrectionEmailHtml(
   `;
 }
 
+// Weekly recap email template
+export function getWeeklyRecapEmailHtml(
+  userName: string,
+  weekData: {
+    topPerformer: { name: string; perfectDays: number };
+    biggestImprover: { name: string; improvement: string };
+    groupHighlights: string;
+    onFire: string[];
+    struggling: string[];
+    weekNumber: number;
+  }
+): string {
+  return `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      </head>
+      <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
+        <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+          <div style="background: white; border-radius: 12px; padding: 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <h1 style="color: #18181b; font-size: 28px; font-weight: 700; margin: 0 0 8px;">Week ${weekData.weekNumber} Recap 📊</h1>
+            <p style="color: #71717a; font-size: 16px; margin: 0 0 24px;">Hey ${userName}, here's how the group performed this week!</p>
+
+            <!-- Top Performer -->
+            <div style="background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+              <div style="color: #78350f; font-size: 14px; font-weight: 600; margin-bottom: 8px;">🏆 TOP PERFORMER</div>
+              <div style="color: white; font-size: 24px; font-weight: 800;">${weekData.topPerformer.name}</div>
+              <div style="color: #78350f; font-size: 14px; margin-top: 4px;">${weekData.topPerformer.perfectDays} perfect days this week!</div>
+            </div>
+
+            <!-- Biggest Improver -->
+            <div style="background: #10b981; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+              <div style="color: rgba(255,255,255,0.8); font-size: 14px; font-weight: 600; margin-bottom: 8px;">📈 MOST IMPROVED</div>
+              <div style="color: white; font-size: 24px; font-weight: 800;">${weekData.biggestImprover.name}</div>
+              <div style="color: rgba(255,255,255,0.8); font-size: 14px; margin-top: 4px;">${weekData.biggestImprover.improvement}</div>
+            </div>
+
+            <!-- Group Highlights -->
+            <h2 style="color: #18181b; font-size: 18px; font-weight: 600; margin: 24px 0 12px;">Group Highlights</h2>
+            <div style="background: #f4f4f5; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+              <p style="color: #18181b; margin: 0; font-size: 14px;">${weekData.groupHighlights}</p>
+            </div>
+
+            <!-- On Fire -->
+            ${
+              weekData.onFire.length > 0
+                ? `
+              <h2 style="color: #18181b; font-size: 18px; font-weight: 600; margin: 24px 0 12px;">🔥 On Fire</h2>
+              <div style="background: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+                <p style="color: #78350f; margin: 0; font-size: 14px;">${weekData.onFire.join(", ")} keeping those streaks alive!</p>
+              </div>
+            `
+                : ""
+            }
+
+            <!-- Struggling -->
+            ${
+              weekData.struggling.length > 0
+                ? `
+              <h2 style="color: #18181b; font-size: 18px; font-weight: 600; margin: 24px 0 12px;">⚠️ Needs a Push</h2>
+              <div style="background: #fee2e2; border-left: 4px solid #ef4444; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+                <p style="color: #991b1b; margin: 0; font-size: 14px;">${weekData.struggling.join(", ")} - Let's step it up this week!</p>
+              </div>
+            `
+                : ""
+            }
+
+            <!-- Next Week -->
+            <div style="background: #18181b; border-radius: 12px; padding: 20px; margin-top: 24px; text-align: center;">
+              <p style="color: white; font-size: 18px; font-weight: 700; margin: 0 0 8px;">Week ${weekData.weekNumber + 1} Starts Tomorrow!</p>
+              <p style="color: #a1a1aa; font-size: 14px; margin: 0;">Let's make it the best week yet. 💪</p>
+            </div>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+}
+
 // Send email function
 export async function sendEmail(
   to: string,
