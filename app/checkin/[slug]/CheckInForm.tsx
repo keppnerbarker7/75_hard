@@ -16,6 +16,8 @@ type CheckInFormProps = {
   currentPosition: number;
   poolTotal: number;
   groupSize: number;
+  averagePenaltyForProjection: number;
+  peopleNotCheckedInToday: number;
 };
 
 export default function CheckInForm({
@@ -26,6 +28,8 @@ export default function CheckInForm({
   currentPosition,
   poolTotal,
   groupSize,
+  averagePenaltyForProjection,
+  peopleNotCheckedInToday,
 }: CheckInFormProps) {
   const router = useRouter();
   const [checkedTasks, setCheckedTasks] = useState<Record<number, boolean>>({
@@ -79,12 +83,20 @@ export default function CheckInForm({
   const missedCount = 5 - completedCount;
   const estimatedPenalty = Math.min(missedCount * 2, 10);
 
-  // Calculate new position after adding today's penalty
-  // When you add a penalty, the pool grows and everyone's share increases
-  const newPoolTotal = poolTotal + estimatedPenalty;
+  // Calculate estimated new position (Option 2b)
+  // The pool currently has $10 for everyone who hasn't checked in (including you)
+  // Remove all those $10 assumptions, then add back realistic estimates:
+  // - Your actual penalty
+  // - Average penalty for everyone else who hasn't checked in yet
+  const totalPeopleNotCheckedIn = peopleNotCheckedInToday + 1; // +1 for you
+  const newPoolTotal = poolTotal
+    - (totalPeopleNotCheckedIn * 10) // Remove all $10 assumptions
+    + estimatedPenalty // Add your actual penalty
+    + (peopleNotCheckedInToday * averagePenaltyForProjection); // Add expected for others
+
   const newShare = newPoolTotal / groupSize;
-  const newTotalPenalty = totalPenalty + estimatedPenalty;
-  const newPosition = newShare - newTotalPenalty;
+  const newTotalPenalty = totalPenalty + estimatedPenalty; // Your actual recorded penalties
+  const estimatedNewPosition = newShare - newTotalPenalty;
 
   return (
     <form onSubmit={handleSubmit}>
@@ -163,10 +175,13 @@ export default function CheckInForm({
           </span>
         </div>
         <div className="flex justify-between items-center text-sm mt-1">
-          <span className="text-zinc-600">New Position:</span>
-          <span className={`font-bold ${newPosition >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-            {newPosition >= 0 ? '+' : ''}${newPosition.toFixed(2)}
+          <span className="text-zinc-600">Est. New Position:</span>
+          <span className={`font-bold ${estimatedNewPosition >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+            {estimatedNewPosition >= 0 ? '+' : ''}${estimatedNewPosition.toFixed(2)}
           </span>
+        </div>
+        <div className="text-xs text-zinc-500 mt-2 italic">
+          * Assumes others perform at today's average (${averagePenaltyForProjection.toFixed(2)})
         </div>
       </div>
 

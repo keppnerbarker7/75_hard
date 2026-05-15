@@ -52,6 +52,11 @@ export default async function CheckInPage({
     0
   );
 
+  // Calculate user's missing days (for current position on leaderboard)
+  const userDaysRecorded = allCheckIns.length;
+  const userMissingDays = Math.max(0, daysPassed - userDaysRecorded);
+  const userMissingPenalty = userMissingDays * 10;
+
   // Calculate pool and position info
   const allUsers = await prisma.user.findMany({
     include: { checkIns: true },
@@ -85,9 +90,36 @@ export default async function CheckInPage({
 
   const poolTotal = recordedPenalties + unrecordedPenalties;
 
-  // Calculate user's current position
+  // Calculate user's current position (what's on the leaderboard)
+  // This includes the assumed $10 penalty for today if they haven't checked in yet
   const share = poolTotal / groupSize;
-  const currentPosition = share - totalPenalty;
+  const totalPenaltyIncludingToday = totalPenalty + userMissingPenalty;
+  const currentPosition = share - totalPenaltyIncludingToday;
+
+  // Calculate today's average penalty for projection
+  // Check how many people have checked in today
+  const todayCheckIns = allUsers.flatMap(u =>
+    u.checkIns.filter(c => c.date === today)
+  );
+
+  let averagePenaltyForProjection: number;
+  if (todayCheckIns.length > 0) {
+    // Use today's average
+    const totalTodayPenalties = todayCheckIns.reduce((sum, c) => sum + c.penalty, 0);
+    averagePenaltyForProjection = totalTodayPenalties / todayCheckIns.length;
+  } else {
+    // Fall back to overall average
+    const allRecordedCheckIns = allUsers.flatMap(u => u.checkIns);
+    const totalAllPenalties = allRecordedCheckIns.reduce((sum, c) => sum + c.penalty, 0);
+    averagePenaltyForProjection = allRecordedCheckIns.length > 0
+      ? totalAllPenalties / allRecordedCheckIns.length
+      : 2; // Default to $2 if no data
+  }
+
+  // Count how many people haven't checked in today (excluding current user)
+  const peopleNotCheckedInToday = allUsers.filter(u =>
+    u.id !== user.id && !u.checkIns.some(c => c.date === today)
+  ).length;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 flex items-center justify-center p-4">
@@ -225,6 +257,8 @@ export default async function CheckInPage({
               currentPosition={currentPosition}
               poolTotal={poolTotal}
               groupSize={groupSize}
+              averagePenaltyForProjection={averagePenaltyForProjection}
+              peopleNotCheckedInToday={peopleNotCheckedInToday}
             />
           )}
 

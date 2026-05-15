@@ -120,9 +120,9 @@ export default async function Dashboard() {
     const share = poolTotal / groupSize;
     const netPosition = share - totalPenalty; // positive = gain, negative = owe
 
-    // Check if they've checked in today
+    // Check if they've checked in today (exclude auto-filled)
     const checkedInToday = userCheckIns.some(
-      (checkIn) => checkIn.date === today
+      (checkIn) => checkIn.date === today && !checkIn.isAutoFilled
     );
 
     return {
