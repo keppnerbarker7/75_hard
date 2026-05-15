@@ -91,33 +91,44 @@ export default async function CheckInPage({
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 flex items-center justify-center p-4">
-      <div className="w-full max-w-2xl">
-        <div className="bg-white rounded-2xl shadow-2xl p-8">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-zinc-900 mb-2">{user.name}</h1>
-            <p className="text-zinc-600 text-lg">{displayDate}</p>
+    <div className="min-h-screen flex items-center justify-center p-4 md:p-6">
+      <div className="w-full max-w-3xl">
+        <div className="paper-panel rounded-[2rem] overflow-hidden shadow-2xl">
+          <div className="px-6 py-6 md:px-8 md:py-8 border-b border-[var(--stroke)] bg-[linear-gradient(135deg,rgba(182,72,33,0.08),transparent_55%,rgba(53,86,72,0.08))]">
+            <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+              <div>
+                <p className="section-kicker text-[var(--accent)] mb-3">
+                  {mode === "correct" ? "Correction Window" : "Daily Check-In"}
+                </p>
+                <h1 className="font-display text-5xl md:text-6xl uppercase leading-none text-zinc-950">
+                  {user.name}
+                </h1>
+                <p className="text-zinc-700 text-base md:text-lg mt-3">{displayDate}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-3 md:min-w-[20rem]">
+                <div className="rounded-2xl bg-white/75 border border-[var(--stroke)] px-4 py-4">
+                  <p className="section-kicker text-zinc-500 mb-2">Position</p>
+                  <p className={`metric-value text-3xl ${currentPosition >= 0 ? "text-[var(--olive)]" : "text-[var(--accent)]"}`}>
+                    {currentPosition >= 0 ? "+" : ""}${currentPosition.toFixed(0)}
+                  </p>
+                </div>
+                <div className="rounded-2xl bg-white/75 border border-[var(--stroke)] px-4 py-4">
+                  <p className="section-kicker text-zinc-500 mb-2">Pool</p>
+                  <p className="metric-value text-3xl text-zinc-950">${poolTotal.toFixed(0)}</p>
+                </div>
+              </div>
+            </div>
             {mode === "correct" && (
-              <p className="text-sm text-orange-700 mt-2 font-semibold">
+              <p className="text-sm text-orange-700 mt-4 font-semibold">
                 Correcting an auto-filled entry. Window closes at midnight after{" "}
                 {getCorrectionDeadlineLabel(targetDate)}.
               </p>
             )}
-            <p className="text-sm text-zinc-500 mt-2">
-              Current Position:{" "}
-              <span
-                className={`font-bold ${
-                  currentPosition >= 0 ? "text-green-600" : "text-red-600"
-                }`}
-              >
-                {currentPosition >= 0 ? "+" : ""}${currentPosition.toFixed(2)}
-              </span>
-            </p>
           </div>
 
           {existingCheckIn && !canCorrect ? (
             <div
-              className={`border-2 rounded-xl p-6 ${
+              className={`m-6 border-2 rounded-[1.5rem] p-6 ${
                 mode === "correct" && existingCheckIn.isAutoFilled
                   ? "bg-orange-50 border-orange-200"
                   : "bg-green-50 border-green-200"
@@ -125,7 +136,7 @@ export default async function CheckInPage({
             >
               <div className="text-center mb-6">
                 <div
-                  className={`inline-block p-3 rounded-full mb-4 ${
+                className={`inline-flex p-3 rounded-full mb-4 ${
                     mode === "correct" && existingCheckIn.isAutoFilled
                       ? "bg-orange-100"
                       : "bg-green-100"
@@ -263,22 +274,43 @@ export default async function CheckInPage({
               </div>
             </div>
           ) : (
-            <CheckInForm
-              slug={slug}
-              tasks={TASKS}
-              totalPenalty={totalPenalty}
-              currentPosition={currentPosition}
-              poolTotal={poolTotal}
-              groupSize={groupSize}
-              groupAvgCompletionRate={groupAvgCompletionRate}
-              groupAvgPenalty={groupAvgPenalty}
-              targetDate={targetDate}
-              mode={mode}
-              existingPenalty={existingCheckIn?.penalty ?? 0}
-            />
+            <div className="px-6 py-6 md:px-8 md:py-8">
+              <div className="grid grid-cols-1 lg:grid-cols-[1fr_20rem] gap-6">
+                <CheckInForm
+                  slug={slug}
+                  tasks={TASKS}
+                  totalPenalty={totalPenalty}
+                  currentPosition={currentPosition}
+                  poolTotal={poolTotal}
+                  groupSize={groupSize}
+                  groupAvgCompletionRate={groupAvgCompletionRate}
+                  groupAvgPenalty={groupAvgPenalty}
+                  targetDate={targetDate}
+                  mode={mode}
+                  existingPenalty={existingCheckIn?.penalty ?? 0}
+                />
+                <aside className="space-y-4">
+                  <div className="rounded-[1.5rem] bg-zinc-950 text-white p-5">
+                    <p className="section-kicker text-white/45 mb-2">Tonight&apos;s Rule</p>
+                    <p className="font-display text-3xl uppercase leading-none">
+                      One missed task costs $2
+                    </p>
+                    <p className="text-sm text-white/65 mt-3">
+                      Five misses caps at $10. The pool gets split at the end of the challenge.
+                    </p>
+                  </div>
+                  <div className="rounded-[1.5rem] bg-white/75 border border-[var(--stroke)] p-5">
+                    <p className="section-kicker text-[var(--accent)] mb-2">Momentum</p>
+                    <p className="text-sm text-zinc-700">
+                      Group completion is averaging {Math.round(groupAvgCompletionRate * 100)}%. A clean entry tonight helps both your net position and your streak.
+                    </p>
+                  </div>
+                </aside>
+              </div>
+            </div>
           )}
 
-          <div className="mt-8 text-center">
+          <div className="px-6 pb-6 md:px-8 md:pb-8 text-center">
             <a
               href="/"
               className="text-zinc-600 hover:text-zinc-900 underline text-sm"
