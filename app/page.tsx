@@ -1,4 +1,10 @@
 import { prisma } from "@/lib/prisma";
+import PerfectDaysTracker, {
+  calculateStreakData,
+} from "./components/PerfectDaysTracker";
+import TaskSuccessRate, {
+  calculateTaskStats,
+} from "./components/TaskSuccessRate";
 
 export const dynamic = "force-dynamic";
 
@@ -127,6 +133,21 @@ export default async function Dashboard() {
   // Sort by net position (highest to lowest)
   leaderboardData.sort((a, b) => b.netPosition - a.netPosition);
 
+  // Calculate perfect days and streaks for each user
+  const perfectDaysData = users.map((user) => {
+    const streakData = calculateStreakData(user.checkIns);
+    return {
+      name: user.name,
+      perfectDays: streakData.perfectDays,
+      currentStreak: streakData.currentStreak,
+      longestStreak: streakData.longestStreak,
+    };
+  });
+
+  // Calculate task success rates from all check-ins
+  const allCheckIns = users.flatMap((user) => user.checkIns);
+  const taskStats = calculateTaskStats(allCheckIns);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 py-12 px-4">
       <div className="max-w-5xl mx-auto">
@@ -179,6 +200,12 @@ export default async function Dashboard() {
               </div>
             ))}
           </div>
+        </div>
+
+        {/* New Stats Sections */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          <PerfectDaysTracker users={perfectDaysData} />
+          <TaskSuccessRate taskStats={taskStats} />
         </div>
 
         {/* Leaderboard */}

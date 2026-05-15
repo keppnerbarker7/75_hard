@@ -21,7 +21,8 @@ export function getReminderEmailHtml(
   userName: string,
   checkInUrl: string,
   yesterdayData: CheckInData | null,
-  leaderboard: LeaderboardEntry[]
+  leaderboard: LeaderboardEntry[],
+  streakData?: { currentStreak: number; perfectDays: number }
 ): string {
   const taskNames = [
     "📖 Read 5 pages",
@@ -47,6 +48,23 @@ export function getReminderEmailHtml(
     `
     : "";
 
+  const streakSection = streakData
+    ? `
+      <div style="background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); border-radius: 12px; padding: 20px; margin: 24px 0; text-align: center;">
+        <div style="font-size: 14px; color: #78350f; font-weight: 600; margin-bottom: 8px;">YOUR STREAK</div>
+        <div style="font-size: 48px; font-weight: 800; color: white; margin-bottom: 8px;">
+          ${streakData.currentStreak > 0 ? "🔥" : "💀"} ${streakData.currentStreak}
+        </div>
+        <div style="font-size: 14px; color: #78350f; font-weight: 600;">
+          ${streakData.currentStreak === 0 ? "Start a new streak today!" : streakData.currentStreak === 1 ? "Keep it going!" : "Perfect days in a row!"}
+        </div>
+        <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.3); font-size: 13px; color: #78350f;">
+          Total Perfect Days: <strong>${streakData.perfectDays}</strong>
+        </div>
+      </div>
+    `
+    : "";
+
   return `
     <!DOCTYPE html>
     <html>
@@ -59,6 +77,8 @@ export function getReminderEmailHtml(
           <div style="background: white; border-radius: 12px; padding: 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
             <h1 style="color: #18181b; font-size: 24px; font-weight: 700; margin: 0 0 8px;">Hey ${userName}! 👋</h1>
             <p style="color: #71717a; font-size: 16px; margin: 0 0 24px;">Time to check in for today.</p>
+
+            ${streakSection}
 
             ${yesterdaySection}
 

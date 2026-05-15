@@ -61,11 +61,38 @@ export async function GET(request: NextRequest) {
 
         const checkInUrl = `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/checkin/${user.slug}`;
 
+        // Calculate streak data for this user
+        const allUserCheckIns = await prisma.checkIn.findMany({
+          where: { userId: user.id },
+          orderBy: { date: "desc" },
+        });
+
+        let currentStreak = 0;
+        let perfectDays = 0;
+
+        // Count perfect days and current streak
+        for (let i = 0; i < allUserCheckIns.length; i++) {
+          const checkIn = allUserCheckIns[i];
+          if (checkIn.penalty === 0) {
+            perfectDays++;
+            if (i === allUserCheckIns.length - 1 || currentStreak > 0) {
+              currentStreak++;
+            }
+          } else if (i === allUserCheckIns.length - 1) {
+            // Most recent check-in had penalty, no current streak
+            break;
+          } else {
+            // Streak broken
+            break;
+          }
+        }
+
         const html = getReminderEmailHtml(
           user.name,
           checkInUrl,
           yesterdayData,
-          leaderboard
+          leaderboard,
+          { currentStreak, perfectDays }
         );
 
         const result = await sendEmail(
