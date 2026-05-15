@@ -24,15 +24,6 @@ type GroupSmallMultiplesProps = {
 
 type ViewMode = "5" | "10" | "all";
 
-const USER_COLORS = [
-  "#3b82f6", // blue
-  "#10b981", // green
-  "#f59e0b", // amber
-  "#ef4444", // red
-  "#8b5cf6", // purple
-  "#ec4899", // pink
-];
-
 export default function GroupSmallMultiples({ users }: GroupSmallMultiplesProps) {
   const [viewMode, setViewMode] = useState<ViewMode>("10");
 
@@ -53,18 +44,18 @@ export default function GroupSmallMultiples({ users }: GroupSmallMultiplesProps)
   };
 
   return (
-    <div className="bg-white rounded-2xl p-4 shadow-lg">
+    <div className="paper-panel rounded-[2rem] p-4 shadow-lg">
       <div className="flex items-center justify-between mb-3">
-        <h2 className="text-lg font-bold text-zinc-900">
+        <h2 className="font-display text-3xl uppercase text-[var(--sand)]">
           Progress Overview
         </h2>
-        <div className="flex items-center gap-2 bg-zinc-100 rounded-lg p-1">
+        <div className="flex items-center gap-2 bg-white/6 rounded-lg p-1">
           <button
             onClick={() => setViewMode("5")}
             className={`px-3 py-1.5 rounded-md text-sm font-semibold transition-colors ${
               viewMode === "5"
-                ? "bg-white text-zinc-900 shadow-sm"
-                : "text-zinc-600 hover:text-zinc-900"
+                ? "bg-[var(--sand)] text-zinc-950 shadow-sm"
+                : "text-[var(--muted)] hover:text-[var(--sand)]"
             }`}
           >
             Last 5
@@ -73,8 +64,8 @@ export default function GroupSmallMultiples({ users }: GroupSmallMultiplesProps)
             onClick={() => setViewMode("10")}
             className={`px-3 py-1.5 rounded-md text-sm font-semibold transition-colors ${
               viewMode === "10"
-                ? "bg-white text-zinc-900 shadow-sm"
-                : "text-zinc-600 hover:text-zinc-900"
+                ? "bg-[var(--sand)] text-zinc-950 shadow-sm"
+                : "text-[var(--muted)] hover:text-[var(--sand)]"
             }`}
           >
             Last 10
@@ -83,8 +74,8 @@ export default function GroupSmallMultiples({ users }: GroupSmallMultiplesProps)
             onClick={() => setViewMode("all")}
             className={`px-3 py-1.5 rounded-md text-sm font-semibold transition-colors ${
               viewMode === "all"
-                ? "bg-white text-zinc-900 shadow-sm"
-                : "text-zinc-600 hover:text-zinc-900"
+                ? "bg-[var(--sand)] text-zinc-950 shadow-sm"
+                : "text-[var(--muted)] hover:text-[var(--sand)]"
             }`}
           >
             All Time
@@ -114,10 +105,10 @@ export default function GroupSmallMultiples({ users }: GroupSmallMultiplesProps)
           const visibleDays = chartData.length;
 
           return (
-            <div key={user.slug} className="bg-zinc-50 rounded-lg p-3">
+            <div key={user.slug} className="rounded-[1.4rem] border border-white/8 bg-white/3 p-3">
               <div className="flex items-center justify-between mb-2">
-                <h3 className="font-semibold text-zinc-900 text-sm">{user.name}</h3>
-                <div className="text-xs text-zinc-500">
+                <h3 className="font-semibold text-[var(--sand)] text-sm">{user.name}</h3>
+                <div className="text-xs text-[var(--muted)]">
                   {chartData.length} {chartData.length === 1 ? "day" : "days"}
                 </div>
               </div>
@@ -135,13 +126,13 @@ export default function GroupSmallMultiples({ users }: GroupSmallMultiplesProps)
                       y1={65 - (taskCount * 50) / 5}
                       x2="270"
                       y2={65 - (taskCount * 50) / 5}
-                      stroke="#e5e7eb"
+                      stroke="rgba(247,239,217,0.12)"
                       strokeWidth="0.5"
                     />
                     <text
                       x="20"
                       y={65 - (taskCount * 50) / 5 + 3}
-                      fill="#9ca3af"
+                      fill="rgba(247,239,217,0.45)"
                       fontSize="10"
                       fontWeight="500"
                       textAnchor="end"
@@ -195,7 +186,7 @@ export default function GroupSmallMultiples({ users }: GroupSmallMultiplesProps)
                     <text
                       x="30"
                       y="75"
-                      fill="#9ca3af"
+                      fill="rgba(247,239,217,0.45)"
                       fontSize="10"
                       fontWeight="500"
                       textAnchor="start"
@@ -206,7 +197,7 @@ export default function GroupSmallMultiples({ users }: GroupSmallMultiplesProps)
                       <text
                         x="270"
                         y="75"
-                        fill="#9ca3af"
+                        fill="rgba(247,239,217,0.45)"
                         fontSize="10"
                         fontWeight="500"
                         textAnchor="end"

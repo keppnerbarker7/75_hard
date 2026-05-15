@@ -10,11 +10,11 @@ type TaskSuccessRateProps = {
 
 export default function TaskSuccessRate({ taskStats }: TaskSuccessRateProps) {
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-lg">
-      <h2 className="text-xl font-bold text-zinc-900 mb-2">
+    <div className="paper-panel rounded-[2rem] p-6 shadow-lg">
+      <h2 className="font-display text-3xl uppercase text-[var(--sand)] mb-2">
         📊 Task Success Rates
       </h2>
-      <p className="text-xs text-zinc-500 mb-4">
+      <p className="text-xs text-[var(--muted)] mb-4 uppercase tracking-[0.16em]">
         Which tasks are hardest?
       </p>
 
@@ -29,39 +29,38 @@ export default function TaskSuccessRate({ taskStats }: TaskSuccessRateProps) {
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                   <span className="text-lg">{task.emoji}</span>
-                  <span className="font-medium text-zinc-900">
+                  <span className="font-medium text-[var(--sand)]">
                     {task.taskName}
                   </span>
                   {isEasiest && (
-                    <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium">
+                    <span className="text-xs bg-[rgba(180,208,127,0.14)] text-[var(--olive)] px-2 py-1 rounded-full font-medium">
                       Easiest
                     </span>
                   )}
                   {isHardest && (
-                    <span className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded-full font-medium">
+                    <span className="text-xs bg-[rgba(255,90,54,0.14)] text-[var(--accent)] px-2 py-1 rounded-full font-medium">
                       Hardest
                     </span>
                   )}
                 </div>
                 <div className="text-right">
-                  <span className="text-lg font-bold text-zinc-900">
+                  <span className="text-lg font-bold text-[var(--sand)]">
                     {percentage}%
                   </span>
-                  <span className="text-xs text-zinc-500 ml-2">
+                  <span className="text-xs text-[var(--muted)] ml-2">
                     ({task.completed}/{task.total})
                   </span>
                 </div>
               </div>
 
-              {/* Progress Bar */}
-              <div className="w-full bg-zinc-200 rounded-full h-3 overflow-hidden">
+              <div className="w-full bg-white/6 rounded-full h-3 overflow-hidden">
                 <div
                   className={`h-full rounded-full transition-all ${
                     percentage >= 80
-                      ? "bg-green-500"
+                      ? "bg-[var(--olive)]"
                       : percentage >= 60
-                      ? "bg-yellow-500"
-                      : "bg-red-500"
+                      ? "bg-[#ffd166]"
+                      : "bg-[var(--accent)]"
                   }`}
                   style={{ width: `${percentage}%` }}
                 />
@@ -71,11 +70,10 @@ export default function TaskSuccessRate({ taskStats }: TaskSuccessRateProps) {
         })}
       </div>
 
-      {/* Group Average */}
-      <div className="mt-6 pt-6 border-t border-zinc-200">
+      <div className="mt-6 pt-6 border-t border-white/8">
         <div className="flex items-center justify-between">
-          <span className="font-bold text-zinc-900">Group Average</span>
-          <span className="text-2xl font-bold text-blue-600">
+          <span className="font-bold text-[var(--sand)]">Group Average</span>
+          <span className="text-2xl font-bold text-[var(--accent)]">
             {Math.round(
               (taskStats.reduce((sum, t) => sum + t.completionRate, 0) /
                 taskStats.length) *

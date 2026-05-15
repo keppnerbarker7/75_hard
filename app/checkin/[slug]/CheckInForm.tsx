@@ -107,11 +107,11 @@ export default function CheckInForm({
             key={task.id}
             className={`group flex items-center gap-4 p-5 md:p-6 rounded-[1.5rem] border cursor-pointer transition-all ${
               checkedTasks[task.id]
-                ? "bg-[#e5f3eb] border-[#79a98f] shadow-[0_10px_30px_rgba(53,86,72,0.12)]"
-                : "bg-white/75 border-[var(--stroke)] hover:border-[var(--accent)]"
+                ? "bg-[rgba(180,208,127,0.08)] border-[rgba(180,208,127,0.34)] shadow-[0_10px_30px_rgba(180,208,127,0.08)]"
+                : "bg-white/3 border-[var(--stroke)] hover:border-[var(--accent)]"
             }`}
           >
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-zinc-950 text-white font-display text-2xl">
+            <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl font-display text-2xl ${checkedTasks[task.id] ? "bg-[var(--olive)] text-zinc-950" : "bg-[var(--sand)] text-zinc-950"}`}>
               {task.id}
             </div>
             <div className="flex-shrink-0">
@@ -126,7 +126,7 @@ export default function CheckInForm({
                 className={`w-10 h-10 rounded-xl border-2 flex items-center justify-center transition-all ${
                   checkedTasks[task.id]
                     ? "bg-[var(--olive)] border-[var(--olive)]"
-                    : "bg-white border-zinc-300 group-hover:border-[var(--accent)]"
+                    : "bg-transparent border-white/25 group-hover:border-[var(--accent)]"
                 }`}
               >
                 {checkedTasks[task.id] && (
@@ -148,7 +148,7 @@ export default function CheckInForm({
             </div>
             <span
               className={`text-base font-medium ${
-                checkedTasks[task.id] ? "text-green-900" : "text-zinc-900"
+                checkedTasks[task.id] ? "text-[var(--sand)]" : "text-[var(--sand)]"
               }`}
             >
               {task.label}
@@ -156,8 +156,8 @@ export default function CheckInForm({
             <span
               className={`ml-auto rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] ${
                 checkedTasks[task.id]
-                  ? "bg-[#cfe5d8] text-[var(--olive)]"
-                  : "bg-[#f1e8da] text-[var(--accent-dark)]"
+                  ? "bg-[rgba(180,208,127,0.14)] text-[var(--olive)]"
+                  : "bg-[rgba(255,90,54,0.14)] text-[var(--accent)]"
               }`}
             >
               {checkedTasks[task.id] ? "done" : "open"}
@@ -166,8 +166,8 @@ export default function CheckInForm({
         ))}
       </div>
 
-      <div className="rounded-[1.5rem] bg-zinc-950 text-white p-5 mb-6 shadow-[0_20px_50px_rgba(18,15,11,0.22)]">
-        <div className="flex justify-between items-center text-sm text-white/60 mb-1">
+      <div className="rounded-[1.5rem] bg-[linear-gradient(180deg,#ff5a36,#c73513)] text-white p-5 mb-6 shadow-[0_20px_50px_rgba(255,90,54,0.22)]">
+        <div className="flex justify-between items-center text-sm text-white/70 mb-1">
           <span>Completed: {completedCount}/5</span>
           <span>Missed: {missedCount}</span>
         </div>
@@ -176,33 +176,33 @@ export default function CheckInForm({
             {mode === "correct" ? "Corrected Penalty:" : "Today's Penalty:"}
           </span>
           <span
-            className={estimatedPenalty === 0 ? "text-[#b9f0d1]" : "text-[#f4d5b1]"}
+            className={estimatedPenalty === 0 ? "text-white" : "text-[#fff0d9]"}
           >
             ${estimatedPenalty}
           </span>
         </div>
-        <div className="flex justify-between items-center text-sm mt-3 pt-3 border-t border-white/10">
-          <span className="text-white/60">Current Position:</span>
+        <div className="flex justify-between items-center text-sm mt-3 pt-3 border-t border-white/15">
+          <span className="text-white/70">Current Position:</span>
           <span
             className={`font-bold ${
-              currentPosition >= 0 ? "text-[#b9f0d1]" : "text-[#f4d5b1]"
+              currentPosition >= 0 ? "text-white" : "text-[#fff0d9]"
             }`}
           >
             {currentPosition >= 0 ? "+" : ""}${currentPosition.toFixed(2)}
           </span>
         </div>
         <div className="flex justify-between items-center text-sm mt-1">
-          <span className="text-white/60">Est. New Position:</span>
+          <span className="text-white/70">Est. New Position:</span>
           <span
             className={`font-bold ${
-              estimatedNewPosition >= 0 ? "text-[#b9f0d1]" : "text-[#f4d5b1]"
+              estimatedNewPosition >= 0 ? "text-white" : "text-[#fff0d9]"
             }`}
           >
             {estimatedNewPosition >= 0 ? "+" : ""}$
             {estimatedNewPosition.toFixed(2)}
           </span>
         </div>
-        <div className="text-xs text-white/45 mt-3 italic">
+        <div className="text-xs text-white/75 mt-3 italic">
           * Estimate only shows your impact. Group avg:{" "}
           {Math.round(groupAvgCompletionRate * 100)}% completion ($
           {groupAvgPenalty.toFixed(2)} penalty)
@@ -210,7 +210,7 @@ export default function CheckInForm({
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">
+        <div className="bg-[rgba(255,90,54,0.12)] border border-[rgba(255,90,54,0.28)] text-[#ffd7cc] px-4 py-3 rounded-lg mb-4">
           {error}
         </div>
       )}
@@ -223,7 +223,7 @@ export default function CheckInForm({
             ? "bg-zinc-300 text-zinc-500 cursor-not-allowed"
             : mode === "correct"
             ? "bg-[var(--accent)] text-white hover:bg-[var(--accent-dark)] active:scale-[0.98]"
-            : "bg-zinc-950 text-white hover:bg-zinc-800 active:scale-[0.98]"
+            : "bg-[var(--sand)] text-zinc-950 hover:bg-white active:scale-[0.98]"
         }`}
       >
         {isSubmitting

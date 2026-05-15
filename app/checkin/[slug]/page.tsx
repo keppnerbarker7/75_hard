@@ -94,27 +94,27 @@ export default async function CheckInPage({
     <div className="min-h-screen flex items-center justify-center p-4 md:p-6">
       <div className="w-full max-w-3xl">
         <div className="paper-panel rounded-[2rem] overflow-hidden shadow-2xl">
-          <div className="px-6 py-6 md:px-8 md:py-8 border-b border-[var(--stroke)] bg-[linear-gradient(135deg,rgba(182,72,33,0.08),transparent_55%,rgba(53,86,72,0.08))]">
+          <div className="px-6 py-6 md:px-8 md:py-8 border-b border-[var(--stroke)] bg-[linear-gradient(135deg,rgba(255,90,54,0.14),transparent_55%,rgba(180,208,127,0.05))]">
             <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
               <div>
                 <p className="section-kicker text-[var(--accent)] mb-3">
                   {mode === "correct" ? "Correction Window" : "Daily Check-In"}
                 </p>
-                <h1 className="font-display text-5xl md:text-6xl uppercase leading-none text-zinc-950">
+                <h1 className="font-display text-5xl md:text-6xl uppercase leading-none text-[var(--sand)]">
                   {user.name}
                 </h1>
-                <p className="text-zinc-700 text-base md:text-lg mt-3">{displayDate}</p>
+                <p className="text-[var(--muted)] text-base md:text-lg mt-3">{displayDate}</p>
               </div>
               <div className="grid grid-cols-2 gap-3 md:min-w-[20rem]">
-                <div className="rounded-2xl bg-white/75 border border-[var(--stroke)] px-4 py-4">
-                  <p className="section-kicker text-zinc-500 mb-2">Position</p>
+                <div className="score-card rounded-2xl px-4 py-4">
+                  <p className="section-kicker text-[var(--muted)] mb-2">Position</p>
                   <p className={`metric-value text-3xl ${currentPosition >= 0 ? "text-[var(--olive)]" : "text-[var(--accent)]"}`}>
                     {currentPosition >= 0 ? "+" : ""}${currentPosition.toFixed(0)}
                   </p>
                 </div>
-                <div className="rounded-2xl bg-white/75 border border-[var(--stroke)] px-4 py-4">
-                  <p className="section-kicker text-zinc-500 mb-2">Pool</p>
-                  <p className="metric-value text-3xl text-zinc-950">${poolTotal.toFixed(0)}</p>
+                <div className="score-card rounded-2xl px-4 py-4">
+                  <p className="section-kicker text-[var(--muted)] mb-2">Pool</p>
+                  <p className="metric-value text-3xl text-[var(--sand)]">${poolTotal.toFixed(0)}</p>
                 </div>
               </div>
             </div>
@@ -128,25 +128,25 @@ export default async function CheckInPage({
 
           {existingCheckIn && !canCorrect ? (
             <div
-              className={`m-6 border-2 rounded-[1.5rem] p-6 ${
+              className={`m-6 border rounded-[1.5rem] p-6 score-card ${
                 mode === "correct" && existingCheckIn.isAutoFilled
-                  ? "bg-orange-50 border-orange-200"
-                  : "bg-green-50 border-green-200"
+                  ? "border-[rgba(255,90,54,0.35)]"
+                  : "border-[rgba(180,208,127,0.35)]"
               }`}
             >
               <div className="text-center mb-6">
                 <div
                 className={`inline-flex p-3 rounded-full mb-4 ${
                     mode === "correct" && existingCheckIn.isAutoFilled
-                      ? "bg-orange-100"
-                      : "bg-green-100"
+                      ? "bg-[rgba(255,90,54,0.16)]"
+                      : "bg-[rgba(180,208,127,0.16)]"
                   }`}
                 >
                   <svg
                     className={`w-12 h-12 ${
                       mode === "correct" && existingCheckIn.isAutoFilled
-                        ? "text-orange-600"
-                        : "text-green-600"
+                        ? "text-[var(--accent)]"
+                        : "text-[var(--olive)]"
                     }`}
                     fill="none"
                     stroke="currentColor"
@@ -163,8 +163,8 @@ export default async function CheckInPage({
                 <h2
                   className={`text-2xl font-bold mb-2 ${
                     mode === "correct" && existingCheckIn.isAutoFilled
-                      ? "text-orange-900"
-                      : "text-green-900"
+                      ? "text-[var(--sand)]"
+                      : "text-[var(--sand)]"
                   }`}
                 >
                   {mode === "correct" && existingCheckIn.isAutoFilled
@@ -174,8 +174,8 @@ export default async function CheckInPage({
                 <p
                   className={
                     mode === "correct" && existingCheckIn.isAutoFilled
-                      ? "text-orange-700"
-                      : "text-green-700"
+                      ? "text-[var(--muted)]"
+                      : "text-[var(--muted)]"
                   }
                 >
                   {mode === "correct" && existingCheckIn.isAutoFilled
@@ -200,13 +200,13 @@ export default async function CheckInPage({
                       key={task.id}
                       className={`flex items-center gap-3 p-4 rounded-lg ${
                         completed
-                          ? "bg-green-100 text-green-900"
-                          : "bg-red-50 text-red-900"
+                          ? "bg-[rgba(180,208,127,0.08)] text-[var(--sand)]"
+                          : "bg-[rgba(255,90,54,0.08)] text-[var(--sand)]"
                       }`}
                     >
                       <div
                         className={`flex-shrink-0 w-6 h-6 rounded flex items-center justify-center ${
-                          completed ? "bg-green-600" : "bg-red-400"
+                          completed ? "bg-[var(--olive)] text-zinc-950" : "bg-[var(--accent)]"
                         }`}
                       >
                         {completed ? (
@@ -248,15 +248,13 @@ export default async function CheckInPage({
               <div
                 className={`mt-6 pt-6 border-t text-center ${
                   mode === "correct" && existingCheckIn.isAutoFilled
-                    ? "border-orange-200"
-                    : "border-green-200"
+                    ? "border-[rgba(255,90,54,0.18)]"
+                    : "border-[rgba(180,208,127,0.18)]"
                 }`}
               >
                 <p
                   className={`text-lg font-bold ${
-                    mode === "correct" && existingCheckIn.isAutoFilled
-                      ? "text-orange-900"
-                      : "text-green-900"
+                    existingCheckIn.penalty === 0 ? "text-[var(--olive)]" : "text-[var(--accent)]"
                   }`}
                 >
                   {mode === "correct" ? "Entry Penalty" : "Today's Penalty"}: $
@@ -265,8 +263,8 @@ export default async function CheckInPage({
                 <p
                   className={`text-sm mt-1 ${
                     mode === "correct" && existingCheckIn.isAutoFilled
-                      ? "text-orange-700"
-                      : "text-green-700"
+                      ? "text-[var(--muted)]"
+                      : "text-[var(--muted)]"
                   }`}
                 >
                   Running Total: ${totalPenalty}
@@ -290,18 +288,18 @@ export default async function CheckInPage({
                   existingPenalty={existingCheckIn?.penalty ?? 0}
                 />
                 <aside className="space-y-4">
-                  <div className="rounded-[1.5rem] bg-zinc-950 text-white p-5">
-                    <p className="section-kicker text-white/45 mb-2">Tonight&apos;s Rule</p>
+                  <div className="rounded-[1.5rem] bg-[linear-gradient(180deg,#ff5a36,#c73513)] text-white p-5">
+                    <p className="section-kicker text-white/55 mb-2">Tonight&apos;s Rule</p>
                     <p className="font-display text-3xl uppercase leading-none">
                       One missed task costs $2
                     </p>
-                    <p className="text-sm text-white/65 mt-3">
+                    <p className="text-sm text-white/80 mt-3">
                       Five misses caps at $10. The pool gets split at the end of the challenge.
                     </p>
                   </div>
-                  <div className="rounded-[1.5rem] bg-white/75 border border-[var(--stroke)] p-5">
+                  <div className="score-card rounded-[1.5rem] p-5">
                     <p className="section-kicker text-[var(--accent)] mb-2">Momentum</p>
-                    <p className="text-sm text-zinc-700">
+                    <p className="text-sm text-[var(--muted)]">
                       Group completion is averaging {Math.round(groupAvgCompletionRate * 100)}%. A clean entry tonight helps both your net position and your streak.
                     </p>
                   </div>
@@ -313,7 +311,7 @@ export default async function CheckInPage({
           <div className="px-6 pb-6 md:px-8 md:pb-8 text-center">
             <a
               href="/"
-              className="text-zinc-600 hover:text-zinc-900 underline text-sm"
+              className="text-[var(--muted)] hover:text-[var(--sand)] underline text-sm"
             >
               View Leaderboard
             </a>

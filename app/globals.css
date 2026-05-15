@@ -1,15 +1,16 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f5f1e8;
-  --foreground: #16120d;
-  --surface: rgba(255, 250, 240, 0.92);
-  --surface-strong: #fff8ee;
-  --stroke: rgba(67, 46, 26, 0.12);
-  --accent: #b64821;
-  --accent-dark: #7f2c12;
-  --olive: #355648;
-  --sand: #d7c5ab;
+  --background: #0d0d0a;
+  --foreground: #f7efd9;
+  --surface: rgba(22, 22, 18, 0.9);
+  --surface-strong: #141410;
+  --stroke: rgba(247, 239, 217, 0.1);
+  --accent: #ff5a36;
+  --accent-dark: #d43b19;
+  --olive: #b4d07f;
+  --sand: #f7efd9;
+  --muted: #b6ab94;
 }
 
 @theme inline {
@@ -22,11 +23,11 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #120f0b;
-    --foreground: #f8f1e8;
-    --surface: rgba(33, 26, 20, 0.92);
-    --surface-strong: #1c1712;
-    --stroke: rgba(255, 238, 214, 0.12);
+    --background: #0d0d0a;
+    --foreground: #f7efd9;
+    --surface: rgba(22, 22, 18, 0.9);
+    --surface-strong: #141410;
+    --stroke: rgba(247, 239, 217, 0.1);
   }
 }
 
@@ -43,8 +44,9 @@ body {
   color: var(--foreground);
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
   background-image:
-    radial-gradient(circle at top, rgba(182, 72, 33, 0.12), transparent 28rem),
-    linear-gradient(180deg, rgba(255, 248, 238, 0.88), rgba(245, 241, 232, 0.96));
+    radial-gradient(circle at top left, rgba(255, 90, 54, 0.2), transparent 24rem),
+    radial-gradient(circle at top right, rgba(180, 208, 127, 0.08), transparent 18rem),
+    linear-gradient(180deg, rgba(17, 17, 13, 0.98), rgba(10, 10, 8, 1));
 }
 
 a,
@@ -66,8 +68,8 @@ label {
   background: var(--surface);
   border: 1px solid var(--stroke);
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.5) inset,
-    0 20px 40px rgba(44, 27, 13, 0.08);
+    0 1px 0 rgba(255, 255, 255, 0.04) inset,
+    0 24px 60px rgba(0, 0, 0, 0.35);
   backdrop-filter: blur(12px);
 }
 
@@ -81,4 +83,12 @@ label {
 .metric-value {
   font-family: var(--font-display), var(--font-geist-sans), sans-serif;
   letter-spacing: 0.02em;
+}
+
+.score-card {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent),
+    var(--surface-strong);
+  border: 1px solid var(--stroke);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
 }
