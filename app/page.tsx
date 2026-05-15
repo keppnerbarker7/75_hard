@@ -3,8 +3,6 @@ import { calculateStreakData } from "./components/PerfectDaysTracker";
 import TaskSuccessRate, {
   calculateTaskStats,
 } from "./components/TaskSuccessRate";
-import GroupCompletionChart from "./components/GroupCompletionChart";
-import GroupHeatmap from "./components/GroupHeatmap";
 import GroupSmallMultiples from "./components/GroupSmallMultiples";
 
 export const dynamic = "force-dynamic";
@@ -297,14 +295,8 @@ export default async function Dashboard() {
         <div className="grid grid-cols-1 gap-4 md:gap-6">
           <TaskSuccessRate taskStats={taskStats} />
 
-          {/* Option 1: Multi-Line Chart */}
-          <GroupCompletionChart users={users} />
-
-          {/* Option 2: Small Multiples */}
+          {/* Group Progress Charts */}
           <GroupSmallMultiples users={users} />
-
-          {/* Option 3: Heatmap */}
-          <GroupHeatmap users={users} />
         </div>
       </div>
     </div>

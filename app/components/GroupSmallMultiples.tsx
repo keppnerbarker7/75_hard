@@ -56,7 +56,7 @@ export default function GroupSmallMultiples({ users }: GroupSmallMultiplesProps)
     <div className="bg-white rounded-2xl p-4 shadow-lg">
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-lg font-bold text-zinc-900">
-          Individual Progress
+          Progress Overview
         </h2>
         <div className="flex items-center gap-2 bg-zinc-100 rounded-lg p-1">
           <button
