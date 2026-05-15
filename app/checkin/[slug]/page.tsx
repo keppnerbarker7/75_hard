@@ -96,34 +96,24 @@ export default async function CheckInPage({
   const totalPenaltyIncludingToday = totalPenalty + userMissingPenalty;
   const currentPosition = share - totalPenaltyIncludingToday;
 
-  // Calculate today's average penalty for projection
-  // Check how many people have checked in today (exclude auto-filled)
-  const todayCheckIns = allUsers.flatMap(u =>
-    u.checkIns.filter(c => c.date === today && !c.isAutoFilled)
-  );
+  // Calculate group average completion rate (same as Task Success Rates on dashboard)
+  const realCheckIns = allUsers.flatMap(u => u.checkIns.filter(c => !c.isAutoFilled));
 
-  let averagePenaltyForProjection: number;
-  let projectionSource: string;
-
-  if (todayCheckIns.length > 0) {
-    // Use today's average (only real check-ins)
-    const totalTodayPenalties = todayCheckIns.reduce((sum, c) => sum + c.penalty, 0);
-    averagePenaltyForProjection = totalTodayPenalties / todayCheckIns.length;
-    projectionSource = "today's average";
-  } else {
-    // Fall back to overall average (exclude auto-filled entries)
-    const realCheckIns = allUsers.flatMap(u => u.checkIns.filter(c => !c.isAutoFilled));
-    const totalRealPenalties = realCheckIns.reduce((sum, c) => sum + c.penalty, 0);
-    averagePenaltyForProjection = realCheckIns.length > 0
-      ? totalRealPenalties / realCheckIns.length
-      : 2; // Default to $2 (4/5 tasks) if no data
-    projectionSource = "overall average";
+  let groupAvgCompletionRate = 0.8; // Default to 80%
+  if (realCheckIns.length > 0) {
+    // Calculate average across all 5 tasks
+    const taskCompletions = [1, 2, 3, 4, 5].map(taskNum => {
+      const taskKey = `task${taskNum}` as 'task1' | 'task2' | 'task3' | 'task4' | 'task5';
+      const completed = realCheckIns.filter(c => c[taskKey]).length;
+      return completed / realCheckIns.length;
+    });
+    groupAvgCompletionRate = taskCompletions.reduce((sum, rate) => sum + rate, 0) / 5;
   }
 
-  // Count how many people haven't checked in today (excluding current user)
-  const peopleNotCheckedInToday = allUsers.filter(u =>
-    u.id !== user.id && !u.checkIns.some(c => c.date === today)
-  ).length;
+  // Convert completion rate to average penalty
+  // If they complete 80% of tasks, they miss 20% = 1 task = $2
+  const avgTasksMissed = (1 - groupAvgCompletionRate) * 5;
+  const groupAvgPenalty = Math.min(avgTasksMissed * 2, 10);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 flex items-center justify-center p-4">
@@ -261,9 +251,8 @@ export default async function CheckInPage({
               currentPosition={currentPosition}
               poolTotal={poolTotal}
               groupSize={groupSize}
-              averagePenaltyForProjection={averagePenaltyForProjection}
-              peopleNotCheckedInToday={peopleNotCheckedInToday}
-              projectionSource={projectionSource}
+              groupAvgCompletionRate={groupAvgCompletionRate}
+              groupAvgPenalty={groupAvgPenalty}
             />
           )}
 

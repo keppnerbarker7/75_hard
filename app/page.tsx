@@ -161,9 +161,16 @@ export default async function Dashboard() {
   // Sort by net position (highest to lowest)
   leaderboardWithPerfectDays.sort((a, b) => b.netPosition - a.netPosition);
 
-  // Calculate task success rates from all check-ins
-  const allCheckIns = users.flatMap((user) => user.checkIns);
-  const taskStats = calculateTaskStats(allCheckIns);
+  // Calculate task success rates from real check-ins only (exclude auto-filled)
+  const realCheckIns = users.flatMap((user) =>
+    user.checkIns.filter(c => !c.isAutoFilled)
+  );
+  const taskStats = calculateTaskStats(realCheckIns);
+
+  // Calculate group average completion rate (0-1)
+  const groupAvgCompletionRate = taskStats.length > 0
+    ? taskStats.reduce((sum, t) => sum + t.completionRate, 0) / taskStats.length
+    : 0.8; // Default to 80% if no data
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 py-6 md:py-12 px-4">
