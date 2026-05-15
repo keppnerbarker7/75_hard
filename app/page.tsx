@@ -63,12 +63,24 @@ export default async function Dashboard() {
   const group = users[0].group;
   const groupSize = users.length;
 
-  // Calculate total pool from all check-ins
-  const allCheckIns = users.flatMap((user) => user.checkIns);
-  const poolTotal = allCheckIns.reduce(
-    (sum, checkIn) => sum + checkIn.penalty,
-    0
-  );
+  // Calculate how many days have passed since start
+  const startDate = new Date(group.startDate);
+  const todayDateForCalc = new Date();
+  const daysPassed = Math.floor(
+    (todayDateForCalc.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
+  ) + 1; // +1 to include start day
+
+  // Calculate total pool including penalties for unrecorded days
+  const recordedPenalties = users.reduce((sum, user) => {
+    return sum + user.checkIns.reduce((s, c) => s + c.penalty, 0);
+  }, 0);
+
+  const totalRecordedDays = users.reduce((sum, user) => sum + user.checkIns.length, 0);
+  const expectedTotalDays = daysPassed * groupSize;
+  const missingDays = expectedTotalDays - totalRecordedDays;
+  const unrecordedPenalties = missingDays * 10;
+
+  const poolTotal = recordedPenalties + unrecordedPenalties;
 
   // Calculate days remaining
   const endDate = new Date(group.endDate);
@@ -77,14 +89,22 @@ export default async function Dashboard() {
     (endDate.getTime() - todayDate.getTime()) / (1000 * 60 * 60 * 24)
   );
 
-  // Build leaderboard data
+  // Build leaderboard data with expected penalties for missing days
   const leaderboardData = users.map((user) => {
     const userCheckIns = user.checkIns;
-    const totalPenalty = userCheckIns.reduce(
+
+    // Sum actual recorded penalties
+    const recordedPenalty = userCheckIns.reduce(
       (sum, checkIn) => sum + checkIn.penalty,
       0
     );
-    const daysCompleted = userCheckIns.length;
+
+    // Calculate missing days and add $10 for each
+    const daysRecorded = userCheckIns.length;
+    const missingDays = Math.max(0, daysPassed - daysRecorded);
+    const missingPenalty = missingDays * 10;
+
+    const totalPenalty = recordedPenalty + missingPenalty;
     const share = poolTotal / groupSize;
     const netPosition = share - totalPenalty; // positive = gain, negative = owe
 
@@ -96,10 +116,11 @@ export default async function Dashboard() {
     return {
       name: user.name,
       slug: user.slug,
-      daysCompleted,
+      daysCompleted: daysRecorded,
       totalPenalty,
       netPosition,
       checkedInToday,
+      missingDays,
     };
   });
 
