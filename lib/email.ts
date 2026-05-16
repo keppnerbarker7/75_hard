@@ -1,6 +1,12 @@
 import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
+const defaultFromAddress =
+  process.env.EMAIL_FROM || process.env.RESEND_FROM || "75 Hard <onboarding@resend.dev>";
+
+function isPlaceholderRecipient(email: string): boolean {
+  return /@placeholder\.com$/i.test(email.trim());
+}
 
 export type CheckInData = {
   task1: boolean;
@@ -249,8 +255,22 @@ export async function sendEmail(
   html: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    if (!process.env.RESEND_API_KEY) {
+      return {
+        success: false,
+        error: "Missing RESEND_API_KEY",
+      };
+    }
+
+    if (isPlaceholderRecipient(to)) {
+      return {
+        success: false,
+        error: `Skipping placeholder recipient: ${to}`,
+      };
+    }
+
     const { data, error } = await resend.emails.send({
-      from: "75 Hard <onboarding@resend.dev>", // Update with your domain later
+      from: defaultFromAddress,
       to: [to],
       subject,
       html,

@@ -154,12 +154,28 @@ export async function GET(request: NextRequest) {
       })
     );
 
+    const failed = results.filter((result) => !result.success);
+
     return NextResponse.json({
-      success: true,
-      message: "Reminder emails sent",
+      success: failed.length === 0,
+      message:
+        failed.length === 0
+          ? "Reminder emails sent"
+          : `Reminder emails sent with ${failed.length} failure${failed.length === 1 ? "" : "s"}`,
+      counts: {
+        total: results.length,
+        sent: results.length - failed.length,
+        failed: failed.length,
+      },
       results,
       timestamp: new Date().toISOString(),
-    });
+      fromAddress:
+        process.env.EMAIL_FROM || process.env.RESEND_FROM || "75 Hard <onboarding@resend.dev>",
+      note:
+        !process.env.EMAIL_FROM && !process.env.RESEND_FROM
+          ? "Using Resend test sender. Verify a domain and set EMAIL_FROM to send to recipients beyond your own Resend account email."
+          : undefined,
+    }, { status: failed.length === 0 ? 200 : 207 });
   } catch (error) {
     console.error("Reminder cron error:", error);
     return NextResponse.json(
