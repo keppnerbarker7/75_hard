@@ -205,25 +205,25 @@ export default async function Dashboard() {
                 {leaderboardWithPerfectDays.map((user, index) => (
                   <div
                     key={user.slug}
-                    className={`grid grid-cols-[auto_1fr_auto] items-center gap-3 rounded-[1.4rem] border px-4 py-4 transition-all ${
+                    className={`grid grid-cols-[auto_1fr_auto] items-center gap-3 rounded-[1.2rem] border px-3 py-3 transition-all ${
                       index === 0
                         ? "bg-[linear-gradient(135deg,rgba(255,90,54,0.18),rgba(247,239,217,0.06))] border-[rgba(255,90,54,0.55)]"
                         : "bg-[rgba(255,255,255,0.02)] border-[var(--stroke)] hover:bg-[rgba(255,255,255,0.04)]"
                     }`}
                   >
-                    <div className={`flex h-11 w-11 items-center justify-center rounded-2xl font-display text-2xl ${index===0 ? "bg-[var(--accent)] text-white" : "bg-[var(--sand)] text-zinc-950"}`}>
+                    <div className={`flex h-9 w-9 items-center justify-center rounded-xl font-display text-xl ${index===0 ? "bg-[var(--accent)] text-white" : "bg-[var(--sand)] text-zinc-950"}`}>
                       {index === 0 ? "1" : index + 1}
                     </div>
                     <div>
                       <div className="flex flex-wrap items-center gap-2">
                         <a
                           href={`/checkin/${user.slug}`}
-                          className="font-semibold text-[var(--sand)] hover:text-[var(--accent)] text-lg"
+                          className="font-semibold text-[var(--sand)] hover:text-[var(--accent)] text-base md:text-lg"
                         >
                           {user.name}
                         </a>
                         <span
-                          className={`rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] ${
+                          className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] ${
                             user.checkedInToday
                               ? "bg-[rgba(180,208,127,0.16)] text-[var(--olive)]"
                               : "bg-[rgba(255,90,54,0.14)] text-[var(--accent)]"
@@ -233,25 +233,25 @@ export default async function Dashboard() {
                         </span>
                         <a
                           href={`/stats/${user.slug}`}
-                          className="px-2.5 py-1 text-[11px] bg-white/8 text-[var(--sand)] hover:bg-white/14 rounded-full font-semibold uppercase tracking-[0.16em] transition-colors"
+                          className="px-2 py-0.5 text-[10px] bg-white/8 text-[var(--sand)] hover:bg-white/14 rounded-full font-semibold uppercase tracking-[0.16em] transition-colors"
                         >
                           stats
                         </a>
                       </div>
-                      <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-[var(--muted)]">
-                        <span>{user.perfectDays} perfect days</span>
+                      <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs md:text-sm text-[var(--muted)]">
                         <span>{user.currentStreak} day streak</span>
+                        <span>{user.perfectDays} perfect</span>
                       </div>
                     </div>
                     <div className="text-right">
                       <div
-                        className={`metric-value text-3xl ${
+                        className={`metric-value text-2xl md:text-3xl ${
                           user.netPosition >= 0 ? "text-[var(--olive)]" : "text-[var(--accent)]"
                         }`}
                       >
                         {user.netPosition >= 0 ? "+" : ""}${user.netPosition.toFixed(0)}
                       </div>
-                      <div className="text-xs uppercase tracking-[0.16em] text-[var(--muted)] mt-1">
+                      <div className="text-[10px] uppercase tracking-[0.16em] text-[var(--muted)] mt-0.5">
                         net position
                       </div>
                     </div>
