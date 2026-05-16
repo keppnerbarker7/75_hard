@@ -30,27 +30,41 @@ const USER_COLORS = [
 ];
 
 export default function GroupCompletionChart({ users }: GroupCompletionChartProps) {
-  // Get the last 10 days of data
-  const maxDays = Math.max(...users.map(u => u.checkIns.length));
-  const startIdx = Math.max(0, maxDays - 10);
+  if (users.length === 0) return null;
+
+  // Find the maximum day number across all users
+  const maxDays = Math.max(...users.map(u => u.checkIns.length), 0);
+  if (maxDays === 0) return null;
+
+  // Determine which days to show (last 10)
+  const startDay = Math.max(1, maxDays - 9); // Show days [startDay, maxDays]
+  const endDay = maxDays;
+  const visibleDays = endDay - startDay + 1;
 
   // Prepare data for each user
   const userChartData = users.map((user, userIdx) => {
-    const recentCheckIns = user.checkIns.slice(startIdx);
-    const data = recentCheckIns.map((checkIn, index) => {
-      const tasksCompleted = [
-        checkIn.task1,
-        checkIn.task2,
-        checkIn.task3,
-        checkIn.task4,
-        checkIn.task5,
-      ].filter(Boolean).length;
+    const data = [];
 
-      return {
-        day: startIdx + index + 1,
-        completionRate: (tasksCompleted / 5) * 100,
-      };
-    });
+    // For each day in the visible range, find the corresponding check-in
+    for (let day = startDay; day <= endDay; day++) {
+      const checkInIdx = day - 1; // day 1 is at index 0
+
+      if (checkInIdx < user.checkIns.length) {
+        const checkIn = user.checkIns[checkInIdx];
+        const tasksCompleted = [
+          checkIn.task1,
+          checkIn.task2,
+          checkIn.task3,
+          checkIn.task4,
+          checkIn.task5,
+        ].filter(Boolean).length;
+
+        data.push({
+          day: day,
+          completionRate: (tasksCompleted / 5) * 100,
+        });
+      }
+    }
 
     return {
       name: user.name,
@@ -59,11 +73,9 @@ export default function GroupCompletionChart({ users }: GroupCompletionChartProp
     };
   });
 
-  if (userChartData.length === 0 || userChartData[0].data.length === 0) {
+  if (userChartData.every(u => u.data.length === 0)) {
     return null;
   }
-
-  const visibleDays = userChartData[0].data.length;
 
   return (
     <div className="bg-white rounded-2xl p-4 shadow-lg">
@@ -104,26 +116,34 @@ export default function GroupCompletionChart({ users }: GroupCompletionChartProp
           {/* Lines for each user */}
           {userChartData.map((userData, userIdx) => (
             <g key={userIdx}>
-              {/* Line path */}
-              <path
-                d={userData.data
-                  .map((point, i) => {
-                    const x = 80 + (i / (visibleDays - 1 || 1)) * 690;
-                    const y = 200 - (point.completionRate * 180) / 100;
-                    return `${i === 0 ? "M" : "L"} ${x} ${y}`;
-                  })
-                  .join(" ")}
-                fill="none"
-                stroke={userData.color.line}
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                opacity="0.8"
-              />
+              {/* Line path - only draw if more than 1 point */}
+              {userData.data.length > 1 && visibleDays > 1 && (
+                <path
+                  d={userData.data
+                    .map((point, i) => {
+                      // Position based on absolute day number
+                      const dayOffset = point.day - startDay;
+                      const x = 80 + (dayOffset / (visibleDays - 1)) * 690;
+                      const y = 200 - (point.completionRate * 180) / 100;
+                      return `${i === 0 ? "M" : "L"} ${x} ${y}`;
+                    })
+                    .join(" ")}
+                  fill="none"
+                  stroke={userData.color.line}
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  opacity="0.8"
+                />
+              )}
 
               {/* Data points */}
               {userData.data.map((point, i) => {
-                const x = 80 + (i / (visibleDays - 1 || 1)) * 690;
+                // Position based on absolute day number
+                const dayOffset = point.day - startDay;
+                const x = visibleDays === 1
+                  ? 425  // Center of chart (80 + 690/2)
+                  : 80 + (dayOffset / (visibleDays - 1)) * 690;
                 const y = 200 - (point.completionRate * 180) / 100;
 
                 return (
@@ -137,18 +157,20 @@ export default function GroupCompletionChart({ users }: GroupCompletionChartProp
           ))}
 
           {/* X-axis labels */}
-          {userChartData[0].data
-            .filter((_, i) => {
+          {Array.from({ length: visibleDays }, (_, i) => startDay + i)
+            .filter((day, i) => {
               if (visibleDays <= 5) return true;
               if (visibleDays <= 10) return i % 2 === 0 || i === visibleDays - 1;
               return i % Math.ceil(visibleDays / 8) === 0 || i === visibleDays - 1;
             })
-            .map((point) => {
-              const i = userChartData[0].data.indexOf(point);
-              const x = 80 + (i / (visibleDays - 1 || 1)) * 690;
+            .map((day, _, filteredDays) => {
+              const dayOffset = day - startDay;
+              const x = visibleDays === 1
+                ? 425  // Center of chart
+                : 80 + (dayOffset / (visibleDays - 1)) * 690;
               return (
                 <text
-                  key={i}
+                  key={day}
                   x={x}
                   y="225"
                   fill="#6b7280"
@@ -156,7 +178,7 @@ export default function GroupCompletionChart({ users }: GroupCompletionChartProp
                   fontWeight="600"
                   textAnchor="middle"
                 >
-                  Day {point.day}
+                  Day {day}
                 </text>
               );
             })}

@@ -35,11 +35,12 @@ export default async function UserStatsPage({
     },
   });
 
-  // Calculate user's task completion rates
-  const userTaskStats = calculateTaskStats(user.checkIns);
+  // Calculate user's task completion rates (excluding auto-filled entries)
+  const realUserCheckIns = user.checkIns.filter(c => !c.isAutoFilled);
+  const userTaskStats = calculateTaskStats(realUserCheckIns);
 
-  // Calculate group average task completion
-  const allCheckIns = allUsers.flatMap((u) => u.checkIns);
+  // Calculate group average task completion (excluding auto-filled entries)
+  const allCheckIns = allUsers.flatMap((u) => u.checkIns.filter(c => !c.isAutoFilled));
   const groupTaskStats = calculateTaskStats(allCheckIns);
 
   // Calculate streak data

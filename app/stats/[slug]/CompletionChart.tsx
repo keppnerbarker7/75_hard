@@ -103,11 +103,11 @@ export default function CompletionChart({ chartData }: CompletionChartProps) {
           ))}
 
           {/* Colored line segments */}
-          {visibleData.slice(0, -1).map((point, i) => {
+          {visibleData.length > 1 && visibleData.slice(0, -1).map((point, i) => {
             const nextPoint = visibleData[i + 1];
-            const x1 = 80 + (i / (visibleData.length - 1 || 1)) * 690;
+            const x1 = 80 + (i / (visibleData.length - 1)) * 690;
             const y1 = 200 - (point.tasksCompleted * 180) / 5;
-            const x2 = 80 + ((i + 1) / (visibleData.length - 1 || 1)) * 690;
+            const x2 = 80 + ((i + 1) / (visibleData.length - 1)) * 690;
             const y2 = 200 - (nextPoint.tasksCompleted * 180) / 5;
 
             // Use the color of the starting point for the segment
@@ -129,7 +129,10 @@ export default function CompletionChart({ chartData }: CompletionChartProps) {
 
           {/* Data points */}
           {visibleData.map((point, i) => {
-            const x = 80 + (i / (visibleData.length - 1 || 1)) * 690;
+            // For single day, center the point; otherwise distribute across chart
+            const x = visibleData.length === 1
+              ? 425  // Center of chart (80 + 690/2)
+              : 80 + (i / (visibleData.length - 1)) * 690;
             const y = 200 - (point.tasksCompleted * 180) / 5;
             const color = getLineColor(point.tasksCompleted);
 
@@ -151,7 +154,9 @@ export default function CompletionChart({ chartData }: CompletionChartProps) {
             })
             .map((point) => {
               const i = visibleData.indexOf(point);
-              const x = 80 + (i / (visibleData.length - 1 || 1)) * 690;
+              const x = visibleData.length === 1
+                ? 425  // Center of chart
+                : 80 + (i / (visibleData.length - 1)) * 690;
               return (
                 <text
                   key={i}

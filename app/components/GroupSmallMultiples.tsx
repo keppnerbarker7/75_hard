@@ -37,14 +37,12 @@ export default function GroupSmallMultiples({ users }: GroupSmallMultiplesProps)
   const [viewMode, setViewMode] = useState<ViewMode>("10");
 
   const getDaysToShow = () => {
-    const maxDays = Math.max(...users.map(u => u.checkIns.length));
+    const maxDays = Math.max(...users.map(u => u.checkIns.length), 0);
     if (viewMode === "all") return maxDays;
-    return parseInt(viewMode);
+    return Math.min(parseInt(viewMode), maxDays);
   };
 
   const daysToShow = getDaysToShow();
-  const maxDays = Math.max(...users.map(u => u.checkIns.length));
-  const startIdx = Math.max(0, maxDays - daysToShow);
 
   const getLineColor = (tasksCompleted: number) => {
     if (tasksCompleted === 5) return "#22c55e";
@@ -94,6 +92,9 @@ export default function GroupSmallMultiples({ users }: GroupSmallMultiplesProps)
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {users.map((user, userIdx) => {
+          // Calculate start index for this specific user
+          const userDays = user.checkIns.length;
+          const startIdx = Math.max(0, userDays - daysToShow);
           const recentCheckIns = user.checkIns.slice(startIdx);
 
           const chartData = recentCheckIns.map((checkIn, index) => {
@@ -106,7 +107,7 @@ export default function GroupSmallMultiples({ users }: GroupSmallMultiplesProps)
             ].filter(Boolean).length;
 
             return {
-              day: startIdx + index + 1,
+              day: startIdx + index + 1,  // Day number relative to this user's data
               tasksCompleted: tasksCompleted,
             };
           });
@@ -152,11 +153,11 @@ export default function GroupSmallMultiples({ users }: GroupSmallMultiplesProps)
                 ))}
 
                 {/* Colored line segments */}
-                {chartData.slice(0, -1).map((point, i) => {
+                {visibleDays > 1 && chartData.slice(0, -1).map((point, i) => {
                   const nextPoint = chartData[i + 1];
-                  const x1 = 30 + (i / (visibleDays - 1 || 1)) * 240;
+                  const x1 = 30 + (i / (visibleDays - 1)) * 240;
                   const y1 = 65 - (point.tasksCompleted * 50) / 5;
-                  const x2 = 30 + ((i + 1) / (visibleDays - 1 || 1)) * 240;
+                  const x2 = 30 + ((i + 1) / (visibleDays - 1)) * 240;
                   const y2 = 65 - (nextPoint.tasksCompleted * 50) / 5;
 
                   const color = getLineColor(point.tasksCompleted);
@@ -177,7 +178,10 @@ export default function GroupSmallMultiples({ users }: GroupSmallMultiplesProps)
 
                 {/* Data points */}
                 {chartData.map((point, i) => {
-                  const x = 30 + (i / (visibleDays - 1 || 1)) * 240;
+                  // For single day, center the point; otherwise distribute across chart
+                  const x = visibleDays === 1
+                    ? 150  // Center of small chart (30 + 240/2)
+                    : 30 + (i / (visibleDays - 1)) * 240;
                   const y = 65 - (point.tasksCompleted * 50) / 5;
                   const color = getLineColor(point.tasksCompleted);
 
