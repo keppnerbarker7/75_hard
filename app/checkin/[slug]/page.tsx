@@ -76,8 +76,8 @@ export default async function CheckInPage({
     },
   });
 
-  // Yesterday is correctable if it exists (for people finishing tasks after midnight)
-  const canCorrectYesterday = yesterdayCheckIn !== null;
+  // Always allow updating yesterday (for people finishing tasks after midnight or who couldn't check in)
+  const canCorrectYesterday = true;
 
   // Calculate total penalties to date
   const allCheckIns = await prisma.checkIn.findMany({

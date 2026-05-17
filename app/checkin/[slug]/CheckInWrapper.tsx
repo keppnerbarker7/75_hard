@@ -135,8 +135,8 @@ export default function CheckInWrapper({
               >
                 Yesterday
               </button>
-              <span className="text-xs text-zinc-500 ml-2">
-                Finished after midnight? Update yesterday until midnight tonight.
+              <span className="text-xs text-zinc-400 ml-2">
+                Can update until midnight
               </span>
             </div>
           </div>
