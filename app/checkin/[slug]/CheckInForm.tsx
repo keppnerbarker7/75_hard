@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 type Task = {
@@ -57,6 +57,17 @@ export default function CheckInForm({
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Update checkboxes when switching days or when existing check-in data changes
+  useEffect(() => {
+    setCheckedTasks({
+      1: existingCheckIn?.task1 || false,
+      2: existingCheckIn?.task2 || false,
+      3: existingCheckIn?.task3 || false,
+      4: existingCheckIn?.task4 || false,
+      5: existingCheckIn?.task5 || false,
+    });
+  }, [existingCheckIn, date]);
 
   const handleCheckboxChange = (taskId: number) => {
     setCheckedTasks((prev) => {
@@ -127,11 +138,11 @@ export default function CheckInForm({
   return (
     <form onSubmit={handleSubmit}>
       {/* Tasks */}
-      <div className="space-y-4 mb-8">
+      <div className="space-y-2 mb-6">
         {tasks.map((task) => (
           <label
             key={task.id}
-            className={`flex items-center gap-4 p-6 rounded-xl border-2 cursor-pointer transition-all ${
+            className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all ${
               checkedTasks[task.id]
                 ? "bg-green-50 border-green-500 shadow-sm"
                 : "bg-zinc-50 border-zinc-200 hover:border-zinc-300"
@@ -146,7 +157,7 @@ export default function CheckInForm({
                 disabled={isSubmitting}
               />
               <div
-                className={`w-10 h-10 rounded-lg border-2 flex items-center justify-center transition-all ${
+                className={`w-7 h-7 rounded-md border-2 flex items-center justify-center transition-all ${
                   checkedTasks[task.id]
                     ? "bg-green-500 border-green-500"
                     : "bg-white border-zinc-300"
@@ -154,7 +165,7 @@ export default function CheckInForm({
               >
                 {checkedTasks[task.id] && (
                   <svg
-                    className="w-6 h-6 text-white"
+                    className="w-5 h-5 text-white"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -170,7 +181,7 @@ export default function CheckInForm({
               </div>
             </div>
             <span
-              className={`text-base font-medium ${
+              className={`text-sm font-medium ${
                 checkedTasks[task.id] ? "text-green-900" : "text-zinc-900"
               }`}
             >
@@ -186,12 +197,12 @@ export default function CheckInForm({
       </div>
 
       {/* Penalty Preview */}
-      <div className="bg-zinc-100 rounded-lg p-4 mb-6">
-        <div className="flex justify-between items-center text-sm text-zinc-600 mb-1">
+      <div className="bg-zinc-100 rounded-lg p-3 mb-4">
+        <div className="flex justify-between items-center text-xs text-zinc-600 mb-1">
           <span>Completed: {completedCount}/5</span>
           <span>Missed: {missedCount}</span>
         </div>
-        <div className="flex justify-between items-center font-bold text-lg">
+        <div className="flex justify-between items-center font-bold text-base">
           <span className="text-zinc-900">Today's Penalty:</span>
           <span
             className={estimatedPenalty === 0 ? "text-green-600" : "text-red-600"}
@@ -199,26 +210,26 @@ export default function CheckInForm({
             ${estimatedPenalty}
           </span>
         </div>
-        <div className="flex justify-between items-center text-sm mt-2 pt-2 border-t border-zinc-300">
+        <div className="flex justify-between items-center text-xs mt-2 pt-2 border-t border-zinc-300">
           <span className="text-zinc-600">Current Position:</span>
           <span className={`font-bold ${currentPosition >= 0 ? 'text-green-600' : 'text-red-600'}`}>
             {currentPosition >= 0 ? '+' : ''}${currentPosition.toFixed(2)}
           </span>
         </div>
-        <div className="flex justify-between items-center text-sm mt-1">
+        <div className="flex justify-between items-center text-xs mt-1">
           <span className="text-zinc-600">Est. New Position:</span>
           <span className={`font-bold ${estimatedNewPosition >= 0 ? 'text-green-600' : 'text-red-600'}`}>
             {estimatedNewPosition >= 0 ? '+' : ''}${estimatedNewPosition.toFixed(2)}
           </span>
         </div>
-        <div className="text-xs text-zinc-500 mt-2 italic">
+        <div className="text-xs text-zinc-500 mt-1.5 italic">
           * Estimate only shows your impact. Group avg: {Math.round(groupAvgCompletionRate * 100)}% completion (${groupAvgPenalty.toFixed(2)} penalty)
         </div>
       </div>
 
       {/* Error Message */}
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">
+        <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-lg mb-3 text-sm">
           {error}
         </div>
       )}
@@ -227,7 +238,7 @@ export default function CheckInForm({
       <button
         type="submit"
         disabled={isSubmitting}
-        className={`w-full py-4 px-6 rounded-xl font-bold text-lg transition-all ${
+        className={`w-full py-3 px-4 rounded-lg font-semibold text-base transition-all ${
           isSubmitting
             ? "bg-zinc-300 text-zinc-500 cursor-not-allowed"
             : "bg-zinc-900 text-white hover:bg-zinc-800 active:scale-[0.98]"
