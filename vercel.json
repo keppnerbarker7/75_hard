@@ -2,19 +2,23 @@
   "crons": [
     {
       "path": "/api/cron/reminder",
-      "schedule": "0 3 * * *"
+      "schedule": "0 13 * * *",
+      "comment": "7:00 AM MT daily reminder"
     },
     {
       "path": "/api/cron/autofill",
-      "schedule": "0 6 * * *"
+      "schedule": "1 6 * * *",
+      "comment": "12:01 AM MT auto-fill missed check-ins"
     },
     {
       "path": "/api/cron/correction",
-      "schedule": "0 14 * * *"
+      "schedule": "5 6 * * *",
+      "comment": "12:05 AM MT correction email"
     },
     {
       "path": "/api/cron/weekly-recap",
-      "schedule": "0 2 * * 1"
+      "schedule": "0 2 * * 1",
+      "comment": "Sunday 8:00 PM MT weekly recap"
     }
   ]
 }

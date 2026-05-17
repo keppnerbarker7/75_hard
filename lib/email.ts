@@ -118,6 +118,16 @@ export function getReminderEmailHtml(
               </a>
             </div>
 
+            <div style="background: #f4f4f5; border-left: 4px solid #3b82f6; border-radius: 8px; padding: 16px; margin: 24px 0;">
+              <p style="color: #18181b; font-size: 14px; margin: 0;">
+                <strong>📅 How Check-Ins Work:</strong><br />
+                • Check in <strong>anytime during the day</strong> (MT timezone)<br />
+                • Update as many times as you want until midnight<br />
+                • At 12:01 AM MT, missed check-ins are auto-filled ($10 penalty)<br />
+                • You have 24 hours to correct auto-filled entries
+              </p>
+            </div>
+
             <h2 style="color: #18181b; font-size: 18px; font-weight: 600; margin: 32px 0 12px;">Current Standings</h2>
             <div style="background: #f4f4f5; border-radius: 8px; padding: 16px;">
               ${leaderboard
