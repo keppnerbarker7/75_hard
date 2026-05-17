@@ -136,7 +136,8 @@ export async function GET(request: NextRequest) {
           checkInUrl,
           yesterdayData,
           leaderboard,
-          { currentStreak, perfectDays }
+          { currentStreak, perfectDays },
+          yesterdayStr
         );
 
         const result = await sendEmail(

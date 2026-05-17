@@ -12,6 +12,7 @@ type CheckInFormProps = {
   userId: string;
   slug: string;
   tasks: Task[];
+  isSunday: boolean;
   totalPenalty: number;
   currentPosition: number;
   poolTotal: number;
@@ -24,6 +25,7 @@ export default function CheckInForm({
   userId,
   slug,
   tasks,
+  isSunday,
   totalPenalty,
   currentPosition,
   poolTotal,
@@ -43,10 +45,19 @@ export default function CheckInForm({
   const [error, setError] = useState<string | null>(null);
 
   const handleCheckboxChange = (taskId: number) => {
-    setCheckedTasks((prev) => ({
-      ...prev,
-      [taskId]: !prev[taskId],
-    }));
+    setCheckedTasks((prev) => {
+      const newState = {
+        ...prev,
+        [taskId]: !prev[taskId],
+      };
+
+      // On Sunday, when checking task 2 (Walk), also check task 3
+      if (isSunday && taskId === 2) {
+        newState[3] = newState[2];
+      }
+
+      return newState;
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -55,6 +66,11 @@ export default function CheckInForm({
     setError(null);
 
     try {
+      // On Sunday, ensure task3 matches task2 (walk counts for both workouts)
+      const tasksToSubmit = isSunday
+        ? { ...checkedTasks, 3: checkedTasks[2] }
+        : checkedTasks;
+
       const response = await fetch("/api/checkin", {
         method: "POST",
         headers: {
@@ -62,7 +78,8 @@ export default function CheckInForm({
         },
         body: JSON.stringify({
           userId,
-          tasks: checkedTasks,
+          tasks: tasksToSubmit,
+          isSunday,
         }),
       });
 
@@ -146,6 +163,11 @@ export default function CheckInForm({
             </span>
           </label>
         ))}
+        {isSunday && (
+          <p className="text-sm text-zinc-600 italic mt-2 text-center">
+            * Sunday: Walk counts for both workouts
+          </p>
+        )}
       </div>
 
       {/* Penalty Preview */}

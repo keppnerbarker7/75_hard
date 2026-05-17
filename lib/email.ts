@@ -29,15 +29,28 @@ export function getReminderEmailHtml(
   checkInUrl: string,
   yesterdayData: CheckInData | null,
   leaderboard: LeaderboardEntry[],
-  streakData?: { currentStreak: number; perfectDays: number }
+  streakData?: { currentStreak: number; perfectDays: number },
+  yesterdayDate?: string
 ): string {
-  const taskNames = [
-    "📖 Read 5 pages",
-    "🏃 Outdoor workout",
-    "💪 Second workout",
-    "💧 1 gallon water",
-    "🥗 Diet",
-  ];
+  // Check if yesterday was Sunday
+  const wasSunday = yesterdayDate ? new Date(yesterdayDate).getDay() === 0 : false;
+
+  // On Sundays, show Walk instead of two workouts
+  const taskNames = wasSunday
+    ? [
+        "📖 Read 5 pages",
+        "🚶 Walk (outdoor activity)",
+        null, // Skip task3 on Sundays
+        "💧 1 gallon water",
+        "🥗 Diet",
+      ]
+    : [
+        "📖 Read 5 pages",
+        "🏃 Outdoor workout",
+        "💪 Second workout",
+        "💧 1 gallon water",
+        "🥗 Diet",
+      ];
 
   const yesterdaySection = yesterdayData
     ? `
@@ -45,6 +58,8 @@ export function getReminderEmailHtml(
       <div style="background: #f4f4f5; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
         ${[yesterdayData.task1, yesterdayData.task2, yesterdayData.task3, yesterdayData.task4, yesterdayData.task5]
           .map((completed, i) => {
+            // Skip task3 on Sundays (null in taskNames array)
+            if (taskNames[i] === null) return "";
             return `<div style="margin: 8px 0; color: ${completed ? "#16a34a" : "#dc2626"};">${completed ? "✓" : "✗"} ${taskNames[i]}</div>`;
           })
           .join("")}

@@ -64,13 +64,23 @@ export default function RecentCheckIns({ checkIns }: RecentCheckInsProps) {
           .reverse()
           .map((checkIn) => {
             const date = new Date(checkIn.date);
-            const tasks = [
-              { emoji: "📖", completed: checkIn.task1, name: "Read" },
-              { emoji: "🏃", completed: checkIn.task2, name: "Workout 1" },
-              { emoji: "💪", completed: checkIn.task3, name: "Workout 2" },
-              { emoji: "💧", completed: checkIn.task4, name: "Water" },
-              { emoji: "🥗", completed: checkIn.task5, name: "Diet" },
-            ];
+            const isSunday = date.getDay() === 0;
+
+            // On Sundays, show Walk instead of two workouts
+            const tasks = isSunday
+              ? [
+                  { emoji: "📖", completed: checkIn.task1, name: "Read" },
+                  { emoji: "🚶", completed: checkIn.task2, name: "Walk" },
+                  { emoji: "💧", completed: checkIn.task4, name: "Water" },
+                  { emoji: "🥗", completed: checkIn.task5, name: "Diet" },
+                ]
+              : [
+                  { emoji: "📖", completed: checkIn.task1, name: "Read" },
+                  { emoji: "🏃", completed: checkIn.task2, name: "Workout 1" },
+                  { emoji: "💪", completed: checkIn.task3, name: "Workout 2" },
+                  { emoji: "💧", completed: checkIn.task4, name: "Water" },
+                  { emoji: "🥗", completed: checkIn.task5, name: "Diet" },
+                ];
 
             return (
               <div

@@ -2,10 +2,17 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import CheckInForm from "./CheckInForm";
 
-const TASKS = [
+const WEEKDAY_TASKS = [
   { id: 1, label: "Read at least 5 pages (physical book)" },
   { id: 2, label: "Outdoor workout — 45 min" },
   { id: 3, label: "Second workout — 45 min" },
+  { id: 4, label: "Drink 1 gallon of water" },
+  { id: 5, label: "Follow your chosen diet" },
+];
+
+const SUNDAY_TASKS = [
+  { id: 1, label: "Read at least 5 pages (physical book)" },
+  { id: 2, label: "Walk (outdoor activity) — 45 min" },
   { id: 4, label: "Drink 1 gallon of water" },
   { id: 5, label: "Follow your chosen diet" },
 ];
@@ -31,6 +38,11 @@ export default async function CheckInPage({
   const today = new Date().toLocaleDateString("en-CA", {
     timeZone: "America/Denver",
   });
+
+  // Check if today is Sunday (MT timezone)
+  const todayMT = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Denver" }));
+  const isSunday = todayMT.getDay() === 0;
+  const TASKS = isSunday ? SUNDAY_TASKS : WEEKDAY_TASKS;
 
   // Check if user has already checked in today
   const existingCheckIn = await prisma.checkIn.findUnique({
@@ -254,6 +266,7 @@ export default async function CheckInPage({
               userId={user.id}
               slug={slug}
               tasks={TASKS}
+              isSunday={isSunday}
               totalPenalty={totalPenalty}
               currentPosition={currentPosition}
               poolTotal={poolTotal}

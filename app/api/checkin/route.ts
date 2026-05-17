@@ -44,6 +44,7 @@ export async function POST(request: NextRequest) {
     const penalty = Math.min(missedTasks * 2, 10);
 
     // Create check-in
+    // Note: On Sundays, task2 (Walk) counts for both workouts, so task3 will match task2
     const checkIn = await prisma.checkIn.create({
       data: {
         userId,
