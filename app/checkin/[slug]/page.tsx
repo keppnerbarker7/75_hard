@@ -76,8 +76,8 @@ export default async function CheckInPage({
     },
   });
 
-  // Yesterday is correctable if it's auto-filled
-  const canCorrectYesterday = yesterdayCheckIn?.isAutoFilled || false;
+  // Yesterday is correctable if it exists (for people finishing tasks after midnight)
+  const canCorrectYesterday = yesterdayCheckIn !== null;
 
   // Calculate total penalties to date
   const allCheckIns = await prisma.checkIn.findMany({
