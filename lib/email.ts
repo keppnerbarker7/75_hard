@@ -1,8 +1,16 @@
-import { Resend } from "resend";
+import nodemailer from "nodemailer";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Create nodemailer transporter using Gmail
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.GMAIL_USER,
+    pass: process.env.GMAIL_APP_PASSWORD,
+  },
+});
+
 const defaultFromAddress =
-  process.env.EMAIL_FROM || process.env.RESEND_FROM || "75 Hard <onboarding@resend.dev>";
+  process.env.EMAIL_FROM || `"75 Hard" <${process.env.GMAIL_USER}>`;
 
 function isPlaceholderRecipient(email: string): boolean {
   return /@placeholder\.com$/i.test(email.trim());
@@ -270,10 +278,10 @@ export async function sendEmail(
   html: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    if (!process.env.RESEND_API_KEY) {
+    if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
       return {
         success: false,
-        error: "Missing RESEND_API_KEY",
+        error: "Missing GMAIL_USER or GMAIL_APP_PASSWORD",
       };
     }
 
@@ -284,17 +292,12 @@ export async function sendEmail(
       };
     }
 
-    const { data, error } = await resend.emails.send({
+    await transporter.sendMail({
       from: defaultFromAddress,
-      to: [to],
-      subject,
-      html,
+      to: to,
+      subject: subject,
+      html: html,
     });
-
-    if (error) {
-      console.error("Resend error:", error);
-      return { success: false, error: error.message };
-    }
 
     return { success: true };
   } catch (error) {
