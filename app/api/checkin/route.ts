@@ -19,23 +19,6 @@ export async function POST(request: NextRequest) {
       timeZone: "America/Denver",
     });
 
-    // Check if user already checked in today
-    const existingCheckIn = await prisma.checkIn.findUnique({
-      where: {
-        userId_date: {
-          userId,
-          date: today,
-        },
-      },
-    });
-
-    if (existingCheckIn) {
-      return NextResponse.json(
-        { error: "Already checked in today" },
-        { status: 409 }
-      );
-    }
-
     // Calculate penalty: $2 per missed task, capped at $10
     const completedTasks = Object.values(tasks as Record<number, boolean>).filter(
       Boolean
@@ -43,10 +26,27 @@ export async function POST(request: NextRequest) {
     const missedTasks = 5 - completedTasks;
     const penalty = Math.min(missedTasks * 2, 10);
 
-    // Create check-in
+    // Upsert check-in (update if exists, create if not)
+    // This allows users to update their check-in throughout the day
     // Note: On Sundays, task2 (Walk) counts for both workouts, so task3 will match task2
-    const checkIn = await prisma.checkIn.create({
-      data: {
+    const checkIn = await prisma.checkIn.upsert({
+      where: {
+        userId_date: {
+          userId,
+          date: today,
+        },
+      },
+      update: {
+        task1: tasks[1] || false,
+        task2: tasks[2] || false,
+        task3: tasks[3] || false,
+        task4: tasks[4] || false,
+        task5: tasks[5] || false,
+        penalty,
+        submittedAt: new Date(),
+        isAutoFilled: false,
+      },
+      create: {
         userId,
         date: today,
         task1: tasks[1] || false,

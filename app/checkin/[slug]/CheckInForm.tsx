@@ -19,6 +19,14 @@ type CheckInFormProps = {
   groupSize: number;
   groupAvgCompletionRate: number;
   groupAvgPenalty: number;
+  existingCheckIn?: {
+    task1: boolean;
+    task2: boolean;
+    task3: boolean;
+    task4: boolean;
+    task5: boolean;
+    penalty: number;
+  } | null;
 };
 
 export default function CheckInForm({
@@ -32,14 +40,15 @@ export default function CheckInForm({
   groupSize,
   groupAvgCompletionRate,
   groupAvgPenalty,
+  existingCheckIn,
 }: CheckInFormProps) {
   const router = useRouter();
   const [checkedTasks, setCheckedTasks] = useState<Record<number, boolean>>({
-    1: false,
-    2: false,
-    3: false,
-    4: false,
-    5: false,
+    1: existingCheckIn?.task1 || false,
+    2: existingCheckIn?.task2 || false,
+    3: existingCheckIn?.task3 || false,
+    4: existingCheckIn?.task4 || false,
+    5: existingCheckIn?.task5 || false,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -218,7 +227,7 @@ export default function CheckInForm({
             : "bg-zinc-900 text-white hover:bg-zinc-800 active:scale-[0.98]"
         }`}
       >
-        {isSubmitting ? "Submitting..." : "Submit Check-In"}
+        {isSubmitting ? "Submitting..." : existingCheckIn ? "Update Check-In" : "Submit Check-In"}
       </button>
     </form>
   );
