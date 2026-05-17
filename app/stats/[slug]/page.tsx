@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { calculateStreakData } from "@/app/components/PerfectDaysTracker";
 import { calculateTaskStats } from "@/app/components/TaskSuccessRate";
 import CompletionChart from "./CompletionChart";
+import RecentCheckIns from "./RecentCheckIns";
 
 export const dynamic = "force-dynamic";
 
@@ -294,77 +295,7 @@ export default async function UserStatsPage({
           </div>
 
           {/* Recent Performance */}
-          <div className="bg-white rounded-2xl p-6 shadow-lg lg:col-span-2">
-            <h2 className="text-xl font-bold text-zinc-900 mb-4">
-              Recent Check-Ins (Last 5 Days)
-            </h2>
-            <div className="space-y-2">
-              {user.checkIns
-                .slice(-5)
-                .reverse()
-                .map((checkIn) => {
-                  const date = new Date(checkIn.date);
-                  const tasks = [
-                    { emoji: "📖", completed: checkIn.task1, name: "Read" },
-                    { emoji: "🏃", completed: checkIn.task2, name: "Workout 1" },
-                    { emoji: "💪", completed: checkIn.task3, name: "Workout 2" },
-                    { emoji: "💧", completed: checkIn.task4, name: "Water" },
-                    { emoji: "🥗", completed: checkIn.task5, name: "Diet" },
-                  ];
-
-                  return (
-                    <div
-                      key={checkIn.id}
-                      className={`flex items-center justify-between p-3 rounded-lg border-2 ${
-                        checkIn.penalty === 0
-                          ? "border-green-300 bg-green-50"
-                          : "border-red-300 bg-red-50"
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="text-xs font-semibold text-zinc-600 w-16">
-                          {date.toLocaleDateString("en-US", {
-                            month: "short",
-                            day: "numeric",
-                          })}
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                          {tasks.map((task, idx) => (
-                            <div
-                              key={idx}
-                              className={`flex items-center justify-center w-7 h-7 rounded-md transition-all ${
-                                task.completed
-                                  ? "bg-green-600 text-white"
-                                  : "bg-zinc-300 text-zinc-500 opacity-40"
-                              }`}
-                              title={task.name}
-                            >
-                              <span className="text-sm">{task.emoji}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        {checkIn.isAutoFilled && (
-                          <span className="text-xs text-orange-600 font-semibold">
-                            Auto
-                          </span>
-                        )}
-                        <span
-                          className={`text-lg font-bold ${
-                            checkIn.penalty === 0
-                              ? "text-green-600"
-                              : "text-red-600"
-                          }`}
-                        >
-                          ${checkIn.penalty}
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })}
-            </div>
-          </div>
+          <RecentCheckIns checkIns={user.checkIns} />
         </div>
       </div>
     </div>
