@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { userId, tasks } = body;
+    const { userId, tasks, date } = body;
 
     // Validate input
     if (!userId || !tasks) {
@@ -14,8 +14,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get today's date in MT timezone (YYYY-MM-DD format)
-    const today = new Date().toLocaleDateString("en-CA", {
+    // Use provided date or default to today's date in MT timezone (YYYY-MM-DD format)
+    const checkInDate = date || new Date().toLocaleDateString("en-CA", {
       timeZone: "America/Denver",
     });
 
@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
       where: {
         userId_date: {
           userId,
-          date: today,
+          date: checkInDate,
         },
       },
       update: {
@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
       },
       create: {
         userId,
-        date: today,
+        date: checkInDate,
         task1: tasks[1] || false,
         task2: tasks[2] || false,
         task3: tasks[3] || false,

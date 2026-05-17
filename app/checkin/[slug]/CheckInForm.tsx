@@ -11,6 +11,7 @@ type Task = {
 type CheckInFormProps = {
   userId: string;
   slug: string;
+  date: string;
   tasks: Task[];
   isSunday: boolean;
   totalPenalty: number;
@@ -26,12 +27,15 @@ type CheckInFormProps = {
     task4: boolean;
     task5: boolean;
     penalty: number;
+    submittedAt?: Date;
   } | null;
+  isCorrectingYesterday?: boolean;
 };
 
 export default function CheckInForm({
   userId,
   slug,
+  date,
   tasks,
   isSunday,
   totalPenalty,
@@ -41,6 +45,7 @@ export default function CheckInForm({
   groupAvgCompletionRate,
   groupAvgPenalty,
   existingCheckIn,
+  isCorrectingYesterday = false,
 }: CheckInFormProps) {
   const router = useRouter();
   const [checkedTasks, setCheckedTasks] = useState<Record<number, boolean>>({
@@ -87,6 +92,7 @@ export default function CheckInForm({
         },
         body: JSON.stringify({
           userId,
+          date,
           tasks: tasksToSubmit,
           isSunday,
         }),
@@ -227,7 +233,14 @@ export default function CheckInForm({
             : "bg-zinc-900 text-white hover:bg-zinc-800 active:scale-[0.98]"
         }`}
       >
-        {isSubmitting ? "Submitting..." : existingCheckIn ? "Update Check-In" : "Submit Check-In"}
+        {isSubmitting
+          ? "Submitting..."
+          : isCorrectingYesterday
+            ? "Correct Yesterday's Check-In"
+            : existingCheckIn
+              ? "Update Check-In"
+              : "Submit Check-In"
+        }
       </button>
     </form>
   );

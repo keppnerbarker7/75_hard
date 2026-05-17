@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import CheckInForm from "./CheckInForm";
+import CheckInWrapper from "./CheckInWrapper";
 
 const WEEKDAY_TASKS = [
   { id: 1, label: "Read at least 5 pages (physical book)" },
@@ -39,10 +39,22 @@ export default async function CheckInPage({
     timeZone: "America/Denver",
   });
 
+  // Get yesterday's date in YYYY-MM-DD format (MT timezone)
+  const yesterdayDate = new Date();
+  yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+  const yesterday = yesterdayDate.toLocaleDateString("en-CA", {
+    timeZone: "America/Denver",
+  });
+
   // Check if today is Sunday (MT timezone)
   const todayMT = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Denver" }));
   const isSunday = todayMT.getDay() === 0;
   const TASKS = isSunday ? SUNDAY_TASKS : WEEKDAY_TASKS;
+
+  // Check yesterday's day of week
+  const yesterdayMT = new Date(yesterdayDate.toLocaleString("en-US", { timeZone: "America/Denver" }));
+  const yesterdayWasSunday = yesterdayMT.getDay() === 0;
+  const YESTERDAY_TASKS = yesterdayWasSunday ? SUNDAY_TASKS : WEEKDAY_TASKS;
 
   // Check if user has already checked in today
   const existingCheckIn = await prisma.checkIn.findUnique({
@@ -53,6 +65,19 @@ export default async function CheckInPage({
       },
     },
   });
+
+  // Check yesterday's check-in to see if it's correctable
+  const yesterdayCheckIn = await prisma.checkIn.findUnique({
+    where: {
+      userId_date: {
+        userId: user.id,
+        date: yesterday,
+      },
+    },
+  });
+
+  // Yesterday is correctable if it's auto-filled
+  const canCorrectYesterday = yesterdayCheckIn?.isAutoFilled || false;
 
   // Calculate total penalties to date
   const allCheckIns = await prisma.checkIn.findMany({
@@ -158,39 +183,25 @@ export default async function CheckInPage({
             </p>
           </div>
 
-          {/* Info Banner about timing */}
-          {existingCheckIn && (
-            <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
-              <div className="flex items-start">
-                <div className="flex-shrink-0">
-                  <svg className="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <div className="ml-3">
-                  <p className="text-sm text-blue-700">
-                    <strong>Last updated:</strong> {new Date(existingCheckIn.submittedAt).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZone: "America/Denver" })} MT
-                    <br />
-                    You can update your check-in as many times as you want until midnight MT.
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Check-in Form (always shown, pre-filled if exists) */}
-          <CheckInForm
+          {/* Check-in Wrapper with day toggle */}
+          <CheckInWrapper
             userId={user.id}
             slug={slug}
-            tasks={TASKS}
-            isSunday={isSunday}
+            todayDate={today}
+            yesterdayDate={yesterday}
+            todayTasks={TASKS}
+            yesterdayTasks={YESTERDAY_TASKS}
+            isTodaySunday={isSunday}
+            isYesterdaySunday={yesterdayWasSunday}
+            todayCheckIn={existingCheckIn}
+            yesterdayCheckIn={yesterdayCheckIn}
+            canCorrectYesterday={canCorrectYesterday}
             totalPenalty={totalPenalty}
             currentPosition={currentPosition}
             poolTotal={poolTotal}
             groupSize={groupSize}
             groupAvgCompletionRate={groupAvgCompletionRate}
             groupAvgPenalty={groupAvgPenalty}
-            existingCheckIn={existingCheckIn}
           />
 
           {/* Footer Link */}
