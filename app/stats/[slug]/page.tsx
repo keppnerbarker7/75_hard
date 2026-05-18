@@ -53,22 +53,45 @@ export default async function UserStatsPage({
     0
   );
 
-  // Prepare data for completion chart
-  const chartData = user.checkIns.map((checkIn, index) => {
-    const tasksCompleted = [
-      checkIn.task1,
-      checkIn.task2,
-      checkIn.task3,
-      checkIn.task4,
-      checkIn.task5,
-    ].filter(Boolean).length;
+  // Prepare data for completion chart - fill in ALL days including missing ones
+  const getDayNumber = (dateStr: string): number => {
+    const startDateStr = new Date(user.group.startDate).toLocaleDateString("en-CA", {
+      timeZone: "America/Denver",
+    });
+    const startDate = new Date(startDateStr);
+    const checkInDate = new Date(dateStr);
+    const daysDiff = Math.floor(
+      (checkInDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
+    );
+    return daysDiff + 1;
+  };
 
-    return {
-      day: index + 1,
-      tasksCompleted: tasksCompleted,
-      date: checkIn.date,
-    };
-  });
+  // Create a map of check-ins by day number
+  const checkInsByDay = new Map(
+    user.checkIns.map(checkIn => [getDayNumber(checkIn.date), checkIn])
+  );
+
+  // Get the max day number from all check-ins
+  const maxDay = Math.max(...user.checkIns.map(c => getDayNumber(c.date)));
+
+  // Create chart data for ALL days from 1 to maxDay, with 0 for missing days
+  const chartData: { day: number; tasksCompleted: number; date: string }[] = [];
+  for (let day = 1; day <= maxDay; day++) {
+    const checkIn = checkInsByDay.get(day);
+    if (checkIn) {
+      const tasksCompleted = [
+        checkIn.task1,
+        checkIn.task2,
+        checkIn.task3,
+        checkIn.task4,
+        checkIn.task5,
+      ].filter(Boolean).length;
+      chartData.push({ day, tasksCompleted, date: checkIn.date });
+    } else {
+      // Missing day - show as 0 tasks completed
+      chartData.push({ day, tasksCompleted: 0, date: "" });
+    }
+  }
 
   // Best/worst days of week analysis
   const dayOfWeekStats: Record<

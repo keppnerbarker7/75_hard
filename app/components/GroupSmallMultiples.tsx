@@ -115,28 +115,32 @@ export default function GroupSmallMultiples({ users, groupStartDate }: GroupSmal
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {users.map((user, userIdx) => {
-          // Filter check-ins to only those in the day range we want to show
-          const relevantCheckIns = user.checkIns
-            .map(checkIn => ({
-              ...checkIn,
-              dayNumber: getDayNumber(checkIn.date),
-            }))
-            .filter(checkIn => checkIn.dayNumber >= minDay && checkIn.dayNumber <= maxDay);
+          // Create a map of check-ins by day number for quick lookup
+          const checkInsByDay = new Map(
+            user.checkIns.map(checkIn => [
+              getDayNumber(checkIn.date),
+              checkIn
+            ])
+          );
 
-          const chartData = relevantCheckIns.map((checkIn) => {
-            const tasksCompleted = [
-              checkIn.task1,
-              checkIn.task2,
-              checkIn.task3,
-              checkIn.task4,
-              checkIn.task5,
-            ].filter(Boolean).length;
-
-            return {
-              day: checkIn.dayNumber,
-              tasksCompleted: tasksCompleted,
-            };
-          });
+          // Create chart data for ALL days in the range, with 0 for missing days
+          const chartData: { day: number; tasksCompleted: number }[] = [];
+          for (let day = minDay; day <= maxDay; day++) {
+            const checkIn = checkInsByDay.get(day);
+            if (checkIn) {
+              const tasksCompleted = [
+                checkIn.task1,
+                checkIn.task2,
+                checkIn.task3,
+                checkIn.task4,
+                checkIn.task5,
+              ].filter(Boolean).length;
+              chartData.push({ day, tasksCompleted });
+            } else {
+              // Missing day - show as 0 tasks completed
+              chartData.push({ day, tasksCompleted: 0 });
+            }
+          }
 
           const visibleDays = chartData.length;
 
@@ -178,14 +182,9 @@ export default function GroupSmallMultiples({ users, groupStartDate }: GroupSmal
                   </g>
                 ))}
 
-                {/* Colored line segments - only connect consecutive days */}
+                {/* Colored line segments - connect all consecutive days */}
                 {chartData.length > 1 && chartData.slice(0, -1).map((point, i) => {
                   const nextPoint = chartData[i + 1];
-
-                  // Only draw line if days are consecutive (gap of 1 day)
-                  if (nextPoint.day - point.day !== 1) {
-                    return null;
-                  }
 
                   // Position based on actual day numbers within the range
                   const dayRange = maxDay - minDay;
