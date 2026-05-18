@@ -178,13 +178,14 @@ export default async function Dashboard() {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8 md:mb-12">
-          <h1 className="text-4xl md:text-5xl xl:text-6xl font-bold text-white mb-2">
-            75 Hard Challenge
+          <h1 className="text-4xl md:text-5xl xl:text-6xl font-bold text-white mb-3">
+            {daysRemaining} Days Remaining
           </h1>
-          <p className="text-zinc-400 text-sm md:text-base">{group.name}</p>
-          <div className="mt-4 inline-flex items-baseline bg-white/10 backdrop-blur-sm px-6 py-3 rounded-full">
-            <span className="text-zinc-300 text-sm font-medium">Days Remaining: </span>
-            <span className="text-white text-2xl font-bold ml-2">{daysRemaining}</span>
+          <p className="text-zinc-400 text-sm md:text-base mb-4">{group.name}</p>
+          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-6 py-3 rounded-full border-2 border-white/20">
+            <span className="text-zinc-300 text-base font-medium">Day</span>
+            <span className="text-white text-3xl font-bold">{daysPassed + 1}</span>
+            <span className="text-zinc-400 text-sm">of 75</span>
           </div>
         </div>
 
@@ -304,7 +305,7 @@ export default async function Dashboard() {
           <TaskSuccessRate taskStats={taskStats} />
 
           {/* Group Progress Charts */}
-          <GroupSmallMultiples users={users} />
+          <GroupSmallMultiples users={users} groupStartDate={group.startDate} />
         </div>
       </div>
     </div>

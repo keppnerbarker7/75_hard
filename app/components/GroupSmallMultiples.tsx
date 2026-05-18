@@ -20,6 +20,7 @@ type User = {
 
 type GroupSmallMultiplesProps = {
   users: User[];
+  groupStartDate: Date;
 };
 
 type ViewMode = "5" | "10" | "all";
@@ -33,16 +34,38 @@ const USER_COLORS = [
   "#ec4899", // pink
 ];
 
-export default function GroupSmallMultiples({ users }: GroupSmallMultiplesProps) {
+export default function GroupSmallMultiples({ users, groupStartDate }: GroupSmallMultiplesProps) {
   const [viewMode, setViewMode] = useState<ViewMode>("10");
 
+  // Calculate the actual day number from a date string
+  const getDayNumber = (dateStr: string): number => {
+    const startDateStr = new Date(groupStartDate).toLocaleDateString("en-CA", {
+      timeZone: "America/Denver",
+    });
+    const startDate = new Date(startDateStr);
+    const checkInDate = new Date(dateStr);
+    const daysDiff = Math.floor(
+      (checkInDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
+    );
+    return daysDiff + 1; // Day 1, Day 2, etc.
+  };
+
+  // Find the maximum day number across all users
+  const maxDayNumber = Math.max(
+    ...users.flatMap(u => u.checkIns.map(c => getDayNumber(c.date))),
+    0
+  );
+
   const getDaysToShow = () => {
-    const maxDays = Math.max(...users.map(u => u.checkIns.length), 0);
-    if (viewMode === "all") return maxDays;
-    return Math.min(parseInt(viewMode), maxDays);
+    if (viewMode === "all") return maxDayNumber;
+    return Math.min(parseInt(viewMode), maxDayNumber);
   };
 
   const daysToShow = getDaysToShow();
+
+  // Calculate the day range to show (last N days)
+  const maxDay = maxDayNumber;
+  const minDay = Math.max(1, maxDay - daysToShow + 1);
 
   const getLineColor = (tasksCompleted: number) => {
     if (tasksCompleted === 5) return "#22c55e";
@@ -92,12 +115,15 @@ export default function GroupSmallMultiples({ users }: GroupSmallMultiplesProps)
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {users.map((user, userIdx) => {
-          // Calculate start index for this specific user
-          const userDays = user.checkIns.length;
-          const startIdx = Math.max(0, userDays - daysToShow);
-          const recentCheckIns = user.checkIns.slice(startIdx);
+          // Filter check-ins to only those in the day range we want to show
+          const relevantCheckIns = user.checkIns
+            .map(checkIn => ({
+              ...checkIn,
+              dayNumber: getDayNumber(checkIn.date),
+            }))
+            .filter(checkIn => checkIn.dayNumber >= minDay && checkIn.dayNumber <= maxDay);
 
-          const chartData = recentCheckIns.map((checkIn, index) => {
+          const chartData = relevantCheckIns.map((checkIn) => {
             const tasksCompleted = [
               checkIn.task1,
               checkIn.task2,
@@ -107,7 +133,7 @@ export default function GroupSmallMultiples({ users }: GroupSmallMultiplesProps)
             ].filter(Boolean).length;
 
             return {
-              day: startIdx + index + 1,  // Day number relative to this user's data
+              day: checkIn.dayNumber,
               tasksCompleted: tasksCompleted,
             };
           });
@@ -153,11 +179,17 @@ export default function GroupSmallMultiples({ users }: GroupSmallMultiplesProps)
                 ))}
 
                 {/* Colored line segments */}
-                {visibleDays > 1 && chartData.slice(0, -1).map((point, i) => {
+                {chartData.length > 1 && chartData.slice(0, -1).map((point, i) => {
                   const nextPoint = chartData[i + 1];
-                  const x1 = 30 + (i / (visibleDays - 1)) * 240;
+                  // Position based on actual day numbers within the range
+                  const dayRange = maxDay - minDay;
+                  const x1 = dayRange === 0
+                    ? 150
+                    : 30 + ((point.day - minDay) / dayRange) * 240;
                   const y1 = 65 - (point.tasksCompleted * 50) / 5;
-                  const x2 = 30 + ((i + 1) / (visibleDays - 1)) * 240;
+                  const x2 = dayRange === 0
+                    ? 150
+                    : 30 + ((nextPoint.day - minDay) / dayRange) * 240;
                   const y2 = 65 - (nextPoint.tasksCompleted * 50) / 5;
 
                   const color = getLineColor(point.tasksCompleted);
@@ -178,10 +210,11 @@ export default function GroupSmallMultiples({ users }: GroupSmallMultiplesProps)
 
                 {/* Data points */}
                 {chartData.map((point, i) => {
-                  // For single day, center the point; otherwise distribute across chart
-                  const x = visibleDays === 1
+                  // Position based on actual day number within the range
+                  const dayRange = maxDay - minDay;
+                  const x = dayRange === 0
                     ? 150  // Center of small chart (30 + 240/2)
-                    : 30 + (i / (visibleDays - 1)) * 240;
+                    : 30 + ((point.day - minDay) / dayRange) * 240;
                   const y = 65 - (point.tasksCompleted * 50) / 5;
                   const color = getLineColor(point.tasksCompleted);
 
@@ -193,7 +226,7 @@ export default function GroupSmallMultiples({ users }: GroupSmallMultiplesProps)
                   );
                 })}
 
-                {/* X-axis labels - only show first and last day */}
+                {/* X-axis labels - show consistent day range for all users */}
                 {chartData.length > 0 && (
                   <>
                     <text
@@ -204,9 +237,9 @@ export default function GroupSmallMultiples({ users }: GroupSmallMultiplesProps)
                       fontWeight="500"
                       textAnchor="start"
                     >
-                      D{chartData[0].day}
+                      D{minDay}
                     </text>
-                    {chartData.length > 1 && (
+                    {daysToShow > 1 && (
                       <text
                         x="270"
                         y="75"
@@ -215,7 +248,7 @@ export default function GroupSmallMultiples({ users }: GroupSmallMultiplesProps)
                         fontWeight="500"
                         textAnchor="end"
                       >
-                        D{chartData[chartData.length - 1].day}
+                        D{maxDay}
                       </text>
                     )}
                   </>

@@ -226,17 +226,17 @@ export function getWeeklyRecapEmailHtml(
             <p style="color: #71717a; font-size: 16px; margin: 0 0 24px;">Hey ${userName}, here's how the group performed this week!</p>
 
             <!-- Top Performer -->
-            <div style="background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); border-radius: 12px; padding: 20px; margin-bottom: 24px;">
-              <div style="color: #78350f; font-size: 14px; font-weight: 600; margin-bottom: 8px;">🏆 TOP PERFORMER</div>
-              <div style="color: white; font-size: 24px; font-weight: 800;">${weekData.topPerformer.name}</div>
-              <div style="color: #78350f; font-size: 14px; margin-top: 4px;">${weekData.topPerformer.perfectDays} perfect days this week!</div>
+            <div style="background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%); border-radius: 12px; padding: 20px; margin-bottom: 24px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+              <div style="color: rgba(255,255,255,0.9); font-size: 14px; font-weight: 600; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;">🏆 TOP PERFORMER</div>
+              <div style="color: white; font-size: 24px; font-weight: 800; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">${weekData.topPerformer.name}</div>
+              <div style="color: white; font-size: 14px; margin-top: 4px; font-weight: 500;">${weekData.topPerformer.perfectDays} perfect days this week!</div>
             </div>
 
             <!-- Biggest Improver -->
-            <div style="background: #10b981; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
-              <div style="color: rgba(255,255,255,0.8); font-size: 14px; font-weight: 600; margin-bottom: 8px;">📈 MOST IMPROVED</div>
-              <div style="color: white; font-size: 24px; font-weight: 800;">${weekData.biggestImprover.name}</div>
-              <div style="color: rgba(255,255,255,0.8); font-size: 14px; margin-top: 4px;">${weekData.biggestImprover.improvement}</div>
+            <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 12px; padding: 20px; margin-bottom: 24px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+              <div style="color: rgba(255,255,255,0.9); font-size: 14px; font-weight: 600; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;">📈 MOST IMPROVED</div>
+              <div style="color: white; font-size: 24px; font-weight: 800; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">${weekData.biggestImprover.name}</div>
+              <div style="color: white; font-size: 14px; margin-top: 4px; font-weight: 500;">${weekData.biggestImprover.improvement}</div>
             </div>
 
             <!-- Group Highlights -->
@@ -250,8 +250,8 @@ export function getWeeklyRecapEmailHtml(
               weekData.onFire.length > 0
                 ? `
               <h2 style="color: #18181b; font-size: 18px; font-weight: 600; margin: 24px 0 12px;">🔥 On Fire</h2>
-              <div style="background: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
-                <p style="color: #78350f; margin: 0; font-size: 14px;">${weekData.onFire.join(", ")} keeping those streaks alive!</p>
+              <div style="background: linear-gradient(135deg, #fb923c 0%, #f97316 100%); border-radius: 8px; padding: 16px; margin-bottom: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <p style="color: white; margin: 0; font-size: 14px; font-weight: 600;">${weekData.onFire.join(", ")} keeping those streaks alive!</p>
               </div>
             `
                 : ""
@@ -262,8 +262,8 @@ export function getWeeklyRecapEmailHtml(
               weekData.struggling.length > 0
                 ? `
               <h2 style="color: #18181b; font-size: 18px; font-weight: 600; margin: 24px 0 12px;">⚠️ Needs a Push</h2>
-              <div style="background: #fee2e2; border-left: 4px solid #ef4444; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
-                <p style="color: #991b1b; margin: 0; font-size: 14px;">${weekData.struggling.join(", ")} - Let's step it up this week!</p>
+              <div style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); border-radius: 8px; padding: 16px; margin-bottom: 24px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <p style="color: white; margin: 0; font-size: 14px; font-weight: 600;">${weekData.struggling.join(", ")} - Let's step it up this week!</p>
               </div>
             `
                 : ""

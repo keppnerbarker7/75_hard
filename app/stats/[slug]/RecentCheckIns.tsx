@@ -63,7 +63,9 @@ export default function RecentCheckIns({ checkIns }: RecentCheckInsProps) {
           .slice()
           .reverse()
           .map((checkIn) => {
-            const date = new Date(checkIn.date);
+            // Parse date as local date (avoid UTC timezone shift)
+            const [year, month, day] = checkIn.date.split('-').map(Number);
+            const date = new Date(year, month - 1, day);
             const isSunday = date.getDay() === 0;
 
             // On Sundays, show Walk instead of two workouts
