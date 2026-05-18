@@ -179,9 +179,9 @@ export default async function Dashboard() {
         {/* Header */}
         <div className="text-center mb-8 md:mb-12">
           <h1 className="text-4xl md:text-5xl xl:text-6xl font-bold text-white mb-3">
-            {daysRemaining} Days Remaining
+            75 Hard Challenge
           </h1>
-          <p className="text-zinc-400 text-sm md:text-base mb-4">{group.name}</p>
+          <p className="text-zinc-400 text-sm md:text-base mb-4">{daysRemaining} Days Remaining</p>
           <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-6 py-3 rounded-full border-2 border-white/20">
             <span className="text-zinc-300 text-base font-medium">Day</span>
             <span className="text-white text-3xl font-bold">{daysPassed + 1}</span>
