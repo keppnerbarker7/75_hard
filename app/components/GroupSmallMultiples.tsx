@@ -178,9 +178,15 @@ export default function GroupSmallMultiples({ users, groupStartDate }: GroupSmal
                   </g>
                 ))}
 
-                {/* Colored line segments */}
+                {/* Colored line segments - only connect consecutive days */}
                 {chartData.length > 1 && chartData.slice(0, -1).map((point, i) => {
                   const nextPoint = chartData[i + 1];
+
+                  // Only draw line if days are consecutive (gap of 1 day)
+                  if (nextPoint.day - point.day !== 1) {
+                    return null;
+                  }
+
                   // Position based on actual day numbers within the range
                   const dayRange = maxDay - minDay;
                   const x1 = dayRange === 0

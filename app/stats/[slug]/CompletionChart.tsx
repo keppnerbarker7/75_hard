@@ -102,9 +102,15 @@ export default function CompletionChart({ chartData }: CompletionChartProps) {
             </g>
           ))}
 
-          {/* Colored line segments */}
+          {/* Colored line segments - only connect consecutive days */}
           {visibleData.length > 1 && visibleData.slice(0, -1).map((point, i) => {
             const nextPoint = visibleData[i + 1];
+
+            // Only draw line if days are consecutive (gap of 1 day)
+            if (nextPoint.day - point.day !== 1) {
+              return null;
+            }
+
             const x1 = 80 + (i / (visibleData.length - 1)) * 690;
             const y1 = 200 - (point.tasksCompleted * 180) / 5;
             const x2 = 80 + ((i + 1) / (visibleData.length - 1)) * 690;
