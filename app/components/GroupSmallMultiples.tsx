@@ -145,7 +145,7 @@ export default function GroupSmallMultiples({ users, groupStartDate }: GroupSmal
               <div className="flex items-center justify-between mb-2">
                 <h3 className="font-semibold text-zinc-900 text-sm">{user.name}</h3>
                 <div className="text-xs text-zinc-500">
-                  {chartData.length} {chartData.length === 1 ? "day" : "days"}
+                  {daysToShow} {daysToShow === 1 ? "day" : "days"}
                 </div>
               </div>
 
