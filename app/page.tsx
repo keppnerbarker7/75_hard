@@ -78,10 +78,10 @@ export default async function Dashboard() {
 
   const startDate = new Date(startDateStr);
   const todayDateForCalc = new Date(todayStr);
-  // Days passed EXCLUDING today (only count complete days)
+  // Days passed INCLUDING today (Day 1 = start date)
   const daysPassed = Math.floor(
     (todayDateForCalc.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
-  );
+  ) + 1;
 
   // Calculate total pool including penalties for unrecorded days
   const recordedPenalties = users.reduce((sum, user) => {
@@ -184,7 +184,7 @@ export default async function Dashboard() {
           <p className="text-zinc-400 text-sm md:text-base mb-4">{daysRemaining} Days Remaining</p>
           <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-6 py-3 rounded-full border-2 border-white/20">
             <span className="text-zinc-300 text-base font-medium">Day</span>
-            <span className="text-white text-3xl font-bold">{daysPassed + 1}</span>
+            <span className="text-white text-3xl font-bold">{daysPassed}</span>
             <span className="text-zinc-400 text-sm">of 75</span>
           </div>
         </div>
