@@ -4,6 +4,7 @@ import TaskSuccessRate, {
   calculateTaskStats,
 } from "./components/TaskSuccessRate";
 import GroupSmallMultiples from "./components/GroupSmallMultiples";
+import PoolContributionChart from "./components/PoolContributionChart";
 
 export const dynamic = "force-dynamic";
 
@@ -312,6 +313,26 @@ export default async function Dashboard() {
 
           {/* Group Progress Charts */}
           <GroupSmallMultiples users={users} groupStartDate={group.startDate} />
+
+          {/* Pool Contribution Chart */}
+          <PoolContributionChart
+            users={leaderboardData.map((user, index) => {
+              const colors = [
+                "#3b82f6", // blue
+                "#10b981", // green
+                "#f59e0b", // amber
+                "#ef4444", // red
+                "#8b5cf6", // purple
+                "#ec4899", // pink
+              ];
+              return {
+                name: user.name,
+                totalPenalty: user.totalPenalty,
+                color: colors[index % colors.length],
+              };
+            })}
+            poolTotal={poolTotal}
+          />
         </div>
       </div>
     </div>
