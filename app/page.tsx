@@ -316,19 +316,20 @@ export default async function Dashboard() {
 
           {/* Pool Contribution Chart */}
           <PoolContributionChart
-            users={leaderboardData.map((user, index) => {
-              const colors = [
-                "#3b82f6", // blue
-                "#10b981", // green
-                "#f59e0b", // amber
-                "#ef4444", // red
-                "#8b5cf6", // purple
-                "#ec4899", // pink
-              ];
+            users={leaderboardData.map((user) => {
+              // Assign specific colors to each person
+              const colorMap: Record<string, string> = {
+                "Hanah": "#ec4899",   // pink
+                "Zach": "#3b82f6",    // blue
+                "Keppner": "#10b981", // green
+                "Winston": "#f59e0b", // amber
+                "Landon": "#ef4444",  // red
+                "Quade": "#8b5cf6",   // purple
+              };
               return {
                 name: user.name,
                 totalPenalty: user.totalPenalty,
-                color: colors[index % colors.length],
+                color: colorMap[user.name] || "#71717a", // fallback to gray
               };
             })}
             poolTotal={poolTotal}
