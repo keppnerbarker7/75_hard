@@ -190,41 +190,51 @@ export default function BulkDayEntry({ users, startDate }: BulkDayEntryProps) {
   const completedUsersCount = Object.keys(checkIns).length;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Day Navigator */}
-      <div className="bg-white rounded-xl p-6 shadow-sm">
-        <div className="flex items-center justify-between mb-4">
+      <div className="bg-white rounded-xl p-4 md:p-6 shadow-sm">
+        <div className="flex items-center justify-between gap-2 md:gap-4 mb-4">
           <button
             onClick={goToPrevDay}
             disabled={currentDayOffset === 0}
-            className={`px-6 py-3 rounded-lg font-bold transition-all ${
+            className={`px-3 md:px-6 py-2 md:py-3 rounded-lg font-bold transition-all text-sm md:text-base ${
               currentDayOffset === 0
                 ? "bg-zinc-200 text-zinc-400 cursor-not-allowed"
                 : "bg-zinc-900 text-white hover:bg-zinc-700"
             }`}
           >
-            ← Prev Day
+            <span className="hidden sm:inline">← Prev Day</span>
+            <span className="sm:hidden">←</span>
           </button>
 
-          <div className="text-center">
-            <p className="text-sm text-zinc-600 font-medium">Day {currentDayOffset + 1}</p>
-            <p className="text-3xl font-bold text-zinc-900 mt-1">
-              {currentDate.toLocaleDateString("en-US", {
-                weekday: "long",
-                month: "long",
-                day: "numeric",
-              })}
+          <div className="text-center flex-1">
+            <p className="text-xs md:text-sm text-zinc-600 font-medium">Day {currentDayOffset + 1}</p>
+            <p className="text-lg md:text-3xl font-bold text-zinc-900 mt-1">
+              <span className="hidden sm:inline">
+                {currentDate.toLocaleDateString("en-US", {
+                  weekday: "long",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </span>
+              <span className="sm:hidden">
+                {currentDate.toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                })}
+              </span>
             </p>
-            <p className="text-sm text-zinc-500 mt-1">
-              {completedUsersCount} of {users.length} users entered
+            <p className="text-xs md:text-sm text-zinc-500 mt-1">
+              {completedUsersCount}/{users.length} entered
             </p>
           </div>
 
           <button
             onClick={goToNextDay}
-            className="px-6 py-3 rounded-lg font-bold bg-zinc-900 text-white hover:bg-zinc-700 transition-all"
+            className="px-3 md:px-6 py-2 md:py-3 rounded-lg font-bold bg-zinc-900 text-white hover:bg-zinc-700 transition-all text-sm md:text-base"
           >
-            Next Day →
+            <span className="hidden sm:inline">Next Day →</span>
+            <span className="sm:hidden">→</span>
           </button>
         </div>
 
@@ -245,21 +255,23 @@ export default function BulkDayEntry({ users, startDate }: BulkDayEntryProps) {
       <div className="bg-white rounded-xl shadow-sm overflow-hidden relative">
         {isLoading && (
           <div className="absolute inset-0 bg-white/80 flex items-center justify-center z-10 rounded-xl">
-            <div className="text-zinc-600 font-medium">Loading check-ins...</div>
+            <div className="text-zinc-600 font-medium text-sm md:text-base">Loading check-ins...</div>
           </div>
         )}
-        <table className="w-full">
-          <thead>
-            <tr className="bg-zinc-900 text-white">
-              <th className="px-6 py-4 text-left font-bold text-lg">Name</th>
-              {TASK_LABELS.map((label) => (
-                <th key={label} className="px-4 py-4 text-center font-semibold">
-                  {label}
-                </th>
-              ))}
-              <th className="px-6 py-4 text-center font-bold">Penalty</th>
-            </tr>
-          </thead>
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[640px]">
+            <thead>
+              <tr className="bg-zinc-900 text-white">
+                <th className="px-3 md:px-6 py-3 md:py-4 text-left font-bold text-sm md:text-lg sticky left-0 bg-zinc-900 z-10">Name</th>
+                {TASK_LABELS.map((label, index) => (
+                  <th key={label} className="px-2 md:px-4 py-3 md:py-4 text-center font-semibold text-xs md:text-base">
+                    <span className="hidden sm:inline">{label}</span>
+                    <span className="sm:hidden">{["📖", "🏃", "💪", "💧", "🥗"][index]}</span>
+                  </th>
+                ))}
+                <th className="px-3 md:px-6 py-3 md:py-4 text-center font-bold text-sm md:text-base">$</th>
+              </tr>
+            </thead>
           <tbody>
             {users.map((user, userIndex) => {
               const userCheckIn = checkIns[user.id] || {
@@ -289,16 +301,16 @@ export default function BulkDayEntry({ users, startDate }: BulkDayEntryProps) {
                     hasAnyChecked ? "bg-green-50" : userIndex % 2 === 0 ? "bg-white" : "bg-zinc-50"
                   }`}
                 >
-                  <td className="px-6 py-4">
-                    <p className="font-bold text-zinc-900 text-lg">{user.name}</p>
-                    <p className="text-sm text-zinc-500">{completedTasks}/5 tasks</p>
+                  <td className="px-3 md:px-6 py-3 md:py-4 sticky left-0 z-10 bg-inherit">
+                    <p className="font-bold text-zinc-900 text-sm md:text-lg">{user.name}</p>
+                    <p className="text-xs md:text-sm text-zinc-500">{completedTasks}/5</p>
                   </td>
                   {[1, 2, 3, 4, 5].map((taskNum) => {
                     const isChecked = Boolean(
                       userCheckIn[`task${taskNum}` as keyof CheckIn]
                     );
                     return (
-                      <td key={taskNum} className="px-4 py-4 text-center">
+                      <td key={taskNum} className="px-2 md:px-4 py-3 md:py-4 text-center">
                         <label className="inline-flex items-center justify-center cursor-pointer">
                           <input
                             type="checkbox"
@@ -308,7 +320,7 @@ export default function BulkDayEntry({ users, startDate }: BulkDayEntryProps) {
                             className="hidden"
                           />
                           <div
-                            className={`w-12 h-12 rounded-lg flex items-center justify-center transition-all ${
+                            className={`w-8 h-8 md:w-12 md:h-12 rounded-lg flex items-center justify-center transition-all ${
                               isChecked
                                 ? "bg-green-500 hover:bg-green-600 shadow-md"
                                 : "bg-zinc-200 hover:bg-zinc-300"
@@ -316,7 +328,7 @@ export default function BulkDayEntry({ users, startDate }: BulkDayEntryProps) {
                           >
                             {isChecked && (
                               <svg
-                                className="w-7 h-7 text-white"
+                                className="w-5 h-5 md:w-7 md:h-7 text-white"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
@@ -334,9 +346,9 @@ export default function BulkDayEntry({ users, startDate }: BulkDayEntryProps) {
                       </td>
                     );
                   })}
-                  <td className="px-6 py-4 text-center">
+                  <td className="px-3 md:px-6 py-3 md:py-4 text-center">
                     <span
-                      className={`text-2xl font-bold ${
+                      className={`text-lg md:text-2xl font-bold ${
                         penalty === 0 ? "text-green-600" : "text-red-600"
                       }`}
                     >
@@ -348,12 +360,13 @@ export default function BulkDayEntry({ users, startDate }: BulkDayEntryProps) {
             })}
           </tbody>
         </table>
+        </div>
 
-        <div className="p-6 bg-zinc-50 border-t-2 border-zinc-200">
+        <div className="p-4 md:p-6 bg-zinc-50 border-t-2 border-zinc-200">
           <button
             onClick={handleSubmitDay}
             disabled={isSubmitting || completedUsersCount === 0}
-            className={`w-full py-4 px-6 rounded-xl font-bold text-lg transition-all ${
+            className={`w-full py-3 md:py-4 px-4 md:px-6 rounded-xl font-bold text-sm md:text-lg transition-all ${
               isSubmitting || completedUsersCount === 0
                 ? "bg-zinc-300 text-zinc-500 cursor-not-allowed"
                 : "bg-zinc-900 text-white hover:bg-zinc-800 active:scale-[0.99]"
@@ -362,8 +375,8 @@ export default function BulkDayEntry({ users, startDate }: BulkDayEntryProps) {
             {isSubmitting
               ? "Saving..."
               : completedUsersCount === 0
-              ? "Check some tasks to save"
-              : `💾 Save Day ${currentDayOffset + 1} (${completedUsersCount} users)`}
+              ? "Check tasks to save"
+              : `💾 Save Day ${currentDayOffset + 1} (${completedUsersCount})`}
           </button>
         </div>
       </div>
